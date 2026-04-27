@@ -1,0 +1,30 @@
+<header class="app-header surface">
+  <div class="app-header__inner">
+    <a class="brand" routerLink="/patient/clinics" aria-label="Pulse clinic home">
+      <span class="brand__logo" aria-hidden="true"></span>
+      <span class="brand__text">
+        <strong>Pulse</strong>
+        <span class="caption">Smart Queue</span>
+      </span>
+    </a>
+
+    <div class="staff-cta">
+      @if (user()) {
+        <div class="staff-cta__actions">
+          <span class="btn btn-primary" [routerLink]="dashboardUrl()">
+            Go to {{ dashboardLabel() }}
+          </span>
+        </div>
+      } @else {
+        <p class="caption staff-cta__text">
+          Clinic staff?
+          <span class="staff-cta__muted">Sign in / create an account.</span>
+        </p>
+        <div class="staff-cta__actions">
+          <span class="btn btn-outline" routerLink="/auth/login">Sign in</span>
+          <span class="btn btn-primary" routerLink="/auth/register">Sign up</span>
+        </div>
+      }
+    </div>
+  </div>
+</header>

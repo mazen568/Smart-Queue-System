@@ -1,0 +1,37 @@
+.state-page {
+  min-height: calc(100dvh - 0px);
+  display: grid;
+  place-items: center;
+  padding: var(--space-8) var(--space-4);
+  background: var(--gradient-zone);
+}
+
+.state-card {
+  width: 100%;
+  max-width: 560px;
+  padding: var(--space-8);
+  display: grid;
+  gap: var(--space-3);
+  text-align: center;
+}
+
+.state-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-full);
+  margin: 0 auto var(--space-2);
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  background: rgba(229, 72, 77, 0.12);
+  color: var(--danger);
+  box-shadow: var(--shadow-soft);
+}
+
+.state-actions {
+  margin-top: var(--space-4);
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  justify-content: center;
+}

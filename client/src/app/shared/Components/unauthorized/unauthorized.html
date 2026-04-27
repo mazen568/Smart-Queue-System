@@ -1,0 +1,17 @@
+<div class="state-page">
+  <div class="state-card surface shadow-zone fade-in-up">
+    <div class="state-icon" aria-hidden="true">!</div>
+    <h2 style="margin: 0;">Unauthorized</h2>
+    <p class="caption" style="margin: 8px 0 0;">
+      You don’t have permission to access this page.
+    </p>
+
+    <div class="state-actions">
+      <button class="btn btn-primary" type="button" (click)="goToDashboard()">
+        Go to {{ dashboardLabel() }}
+      </button>
+
+      <a class="btn btn-ghost" routerLink="/auth/login">Sign in</a>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,300 @@
+/* =========================
+   DESIGN SYSTEM — GLOBAL
+   Pulse.clinic v1.0
+========================= */
+
+/* ---------- CSS VARIABLES (TOKENS) ---------- */
+:root {
+    /* Colors */
+    --background: #F8F8F9;
+    --surface: #FFFFFF;
+    --surface-elevated: #FCFCFD;
+  
+    --foreground: #111111;
+    --muted-foreground: #6B6B6B;
+  
+    --accent: #3B82F6;
+    --accent-hover: #2563EB;
+  
+    --border: #EAEAEA;
+  
+    /* Status */
+    --success: #2EB872;
+    --warning: #F59E0B;
+    --danger: #E5484D;
+  
+    /* Typography */
+    --font-family: 'Outfit', sans-serif;
+  
+    --display-size: 56px;
+    --h1-size: 40px;
+    --h2-size: 28px;
+    --h3-size: 20px;
+    --body-size: 14px;
+    --caption-size: 11px;
+  
+    /* Spacing (4pt system) */
+    --space-0-5: 2px;
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-6: 24px;
+    --space-8: 32px;
+    --space-12: 48px;
+    --space-16: 64px;
+  
+    /* Radius */
+    --radius-sm: 2px;
+    --radius-md: 6px;
+    --radius-lg: 14px;
+    --radius-xl: 28px;
+    --radius-full: 60px;
+  
+    /* Shadows */
+    --shadow-soft: 0 1px 2px rgba(0, 0, 0, 0.04);
+    --shadow-zone: 0 12px 40px -12px rgba(0, 0, 0, 0.10);
+    --shadow-glow: 0 12px 40px -12px rgba(59, 130, 246, 0.30);
+  
+    /* Gradients */
+    --gradient-accent: linear-gradient(135deg, #3B82F6, #60A5FA);
+    --gradient-glow: radial-gradient(circle, rgba(59,130,246,0.3), transparent 70%);
+    --gradient-zone: linear-gradient(180deg, #FFFFFF, #F8F8F9);
+    --gradient-surface: linear-gradient(180deg, #FFFFFF, #FCFCFD);
+  
+    /* Motion */
+    --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+    --ease-in-out-soft: cubic-bezier(0.65, 0, 0.35, 1);
+  }
+  
+  
+  /* ---------- BASE RESET ---------- */
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+  
+  html, body {
+    margin: 0;
+    padding: 0;
+    font-family: var(--font-family);
+    background: var(--background);
+    color: var(--foreground);
+    -webkit-font-smoothing: antialiased;
+  }
+  
+  
+  /* ---------- TYPOGRAPHY ---------- */
+  .display {
+    font-size: var(--display-size);
+    font-weight: 600;
+    letter-spacing: -0.035em;
+  }
+  
+  h1 {
+    font-size: var(--h1-size);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+  
+  h2 {
+    font-size: var(--h2-size);
+    font-weight: 600;
+  }
+  
+  h3 {
+    font-size: var(--h3-size);
+    font-weight: 500;
+  }
+  
+  body, p {
+    font-size: var(--body-size);
+    line-height: 1.5;
+  }
+  
+  .caption {
+    font-size: var(--caption-size);
+    color: var(--muted-foreground);
+  }
+  
+  
+  /* ---------- SURFACES ---------- */
+  .surface {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+  }
+  
+  .surface-elevated {
+    background: var(--surface-elevated);
+    box-shadow: var(--shadow-zone);
+    border-radius: var(--radius-lg);
+  }
+  
+  .zone-glass {
+    backdrop-filter: blur(24px) saturate(140%);
+    background: rgba(255, 255, 255, 0.6);
+    border-radius: var(--radius-lg);
+  }
+  
+  
+  /* ---------- BUTTONS (BASE) ---------- */
+  .btn {
+    padding: var(--space-2) var(--space-4);
+    border-radius: var(--radius-md);
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s var(--ease-out-soft);
+    font-weight: 500;
+  }
+  
+  .btn-primary {
+    background: var(--accent);
+    color: white;
+  }
+  
+  .btn-primary:hover {
+    background: var(--accent-hover);
+  }
+  
+  .btn-outline {
+    background: transparent;
+    border: 1px solid var(--border);
+  }
+  
+  .btn-ghost {
+    background: transparent;
+  }
+  
+  
+  /* ---------- INPUT ---------- */
+  input {
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+    outline: none;
+    transition: all 0.2s var(--ease-in-out-soft);
+  }
+  
+  input:focus {
+    border-color: var(--accent);
+  }
+  
+  
+  /* ---------- BADGES ---------- */
+  .badge {
+    padding: 2px 8px;
+    border-radius: var(--radius-full);
+    font-size: var(--caption-size);
+  }
+  
+  .badge-success {
+    background: rgba(46, 184, 114, 0.1);
+    color: var(--success);
+  }
+  
+  .badge-warning {
+    background: rgba(245, 158, 11, 0.1);
+    color: var(--warning);
+  }
+  
+  .badge-danger {
+    background: rgba(229, 72, 77, 0.1);
+    color: var(--danger);
+  }
+  
+  
+  /* ---------- SHADOW UTILITIES ---------- */
+  .shadow-soft {
+    box-shadow: var(--shadow-soft);
+  }
+  
+  .shadow-zone {
+    box-shadow: var(--shadow-zone);
+  }
+  
+  .shadow-glow {
+    box-shadow: var(--shadow-glow);
+  }
+  
+  
+  /* ---------- ANIMATIONS ---------- */
+  @keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  
+  @keyframes fade-in-up {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  @keyframes scale-in {
+    from {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+  
+  @keyframes slide-in {
+    from {
+      transform: translateX(20px);
+    }
+    to {
+      transform: translateX(0);
+    }
+  }
+  
+  @keyframes pulse-soft {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+  }
+  
+  @keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+  
+  
+  /* ---------- ANIMATION CLASSES ---------- */
+  .fade-in {
+    animation: fade-in 500ms var(--ease-out-soft);
+  }
+  
+  .fade-in-up {
+    animation: fade-in-up 600ms var(--ease-out-soft);
+  }
+  
+  .scale-in {
+    animation: scale-in 350ms var(--ease-out-soft);
+  }
+  
+  .slide-in {
+    animation: slide-in 400ms var(--ease-out-soft);
+  }
+  
+  .pulse-soft {
+    animation: pulse-soft 2.4s infinite;
+  }
+  
+  .shimmer {
+    background: linear-gradient(
+      90deg,
+      #eee 25%,
+      #ddd 50%,
+      #eee 75%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 2.5s infinite;
+  }
