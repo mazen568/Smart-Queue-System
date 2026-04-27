@@ -5,7 +5,7 @@
 - **Implemented authentication + authorization** using JWT (access + refresh tokens)
 - **Introduced multi-tenant boundaries** using `clinicId` (each user belongs to a clinic)
 
-### Project structure (what you set up)
+### Project structure 
 - **Routing layer**: `routes/authRoutes.js`
   - Defines auth endpoints and wires middleware
 - **Controller layer**: `controllers/authController.js`
@@ -26,7 +26,7 @@
 - **Server entry**: `server.js`
   - Express setup, CORS + cookies, route mounting, MongoDB connection, global error handler
 
-### What you implemented (features)
+### Implemented Features : 
 - **Server bootstrapping**
   - Parses JSON requests
   - Enables `cookie-parser` for refresh-token cookies
@@ -86,7 +86,7 @@
   - Instance method `comparePassword()`
   - Index on `clinicId`
 
-### How you approached it (engineering approach)
+### Approach :
 - **Layered separation of concerns**
   - Routes define endpoints + middleware chaining
   - Controllers focus on HTTP behavior (cookies, responses)

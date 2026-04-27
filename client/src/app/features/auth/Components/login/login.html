@@ -1,0 +1,37 @@
+<div class="auth-page">
+  <div class="auth-card surface shadow-zone fade-in-up">
+    <div class="auth-header">
+      <h2 style="margin: 0;">Welcome back</h2>
+      <p class="caption" style="margin: 6px 0 0;">Sign in to continue.</p>
+    </div>
+
+    <form class="auth-form" [formGroup]="form" (ngSubmit)="submit()">
+      <div class="field">
+        <label class="caption" for="email">Email</label>
+        <input id="email" type="email" formControlName="email" placeholder="name@example.com" />
+        <p class="caption error" *ngIf="form.controls.email.touched && form.controls.email.invalid">
+          Please enter a valid email.
+        </p>
+      </div>
+
+      <div class="field">
+        <label class="caption" for="password">Password</label>
+        <input id="password" type="password" formControlName="password" placeholder="••••••••" />
+        <p class="caption error" *ngIf="form.controls.password.touched && form.controls.password.invalid">
+          Password must be at least 8 characters.
+        </p>
+      </div>
+
+      <p class="caption error" *ngIf="serverError()">{{ serverError() }}</p>
+
+      <button class="btn btn-primary" type="submit" [disabled]="isSubmitting()">
+        {{ isSubmitting() ? 'Signing in…' : 'Sign in' }}
+      </button>
+    </form>
+
+    <div class="auth-footer caption">
+      Don’t have an account?
+      <a routerLink="/auth/register">Create one</a>
+    </div>
+  </div>
+</div>
