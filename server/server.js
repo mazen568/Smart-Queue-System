@@ -1,8 +1,9 @@
 import express from "express"
 import mongoose from "mongoose"
-import  dotenv  from "dotenv"
+import dotenv from "dotenv"
 import { errorHandler } from "./middlewares/errorHandling.js"
 import authRouter from "./routes/authRoutes.js"
+import adminRouter from "./routes/adminRoutes.js"
 import cookieParser from "cookie-parser"
 import cors from "cors"
 
@@ -31,6 +32,7 @@ app.use(cors({
 app.use(`${baseURL}/auth`, authRouter)
 
 //protected routes
+app.use(`${baseURL}/admin`, adminRouter)
 
 
 
@@ -42,14 +44,14 @@ app.use(errorHandler)
 
 //connection 
 mongoose.connect(process.env.MONGODB_URL)
-.then(()=>{
-    console.log("Connected to DB");
+    .then(() => {
+        console.log("Connected to DB");
 
-    app.listen(port,()=>{
-        console.log(`Server Listening on port : ${port}`);
+        app.listen(port, () => {
+            console.log(`Server Listening on port : ${port}`);
+        })
+
     })
-    
-})
-.catch((err)=>{
-    console.log("An error occurred While connecting to DB",err);
-})
+    .catch((err) => {
+        console.log("An error occurred While connecting to DB", err);
+    })
