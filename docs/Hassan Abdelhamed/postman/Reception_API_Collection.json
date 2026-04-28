@@ -1,0 +1,534 @@
+{
+  "info": {
+    "name": "Smart Queue — Reception API (Member 3)",
+    "description": "Complete test collection for the Reception Queue Control feature.\n\n**How to use:**\n1. Run '1. Login' first to get a JWT token.\n2. Run '2. Get Queues' to see available queues and copy a queueId.\n3. Run the remaining requests in order to test the full flow.\n\n**Variables are auto-set** by the Login and Call Next scripts.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3000/api/v1" },
+    { "key": "accessToken", "value": "" },
+    { "key": "clinicId", "value": "69f0764b92213da423233bbf" },
+    { "key": "queueId", "value": "69f0764c92213da423233bc2" },
+    { "key": "ticketId", "value": "" }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [{ "key": "token", "value": "{{accessToken}}", "type": "string" }]
+  },
+  "item": [
+    {
+      "name": "0. Auth",
+      "item": [
+        {
+          "name": "1. Login (Admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.user && res.user.accessToken) {",
+                  "    pm.collectionVariables.set('accessToken', res.user.accessToken);",
+                  "    pm.collectionVariables.set('clinicId', res.user.clinicId);",
+                  "    console.log('✅ Token saved. ClinicId:', res.user.clinicId);",
+                  "}",
+                  "pm.test('Login successful', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/auth/login",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@test.com\",\n  \"password\": \"123456\"\n}"
+            },
+            "description": "⚠️ Replace email/password with your actual admin credentials.\nThe test script auto-saves the JWT token and clinicId."
+          }
+        },
+        {
+          "name": "2. Login (Reception Staff)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.user && res.user.accessToken) {",
+                  "    pm.collectionVariables.set('accessToken', res.user.accessToken);",
+                  "    pm.collectionVariables.set('clinicId', res.user.clinicId);",
+                  "}",
+                  "pm.test('Login successful', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/auth/login",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"reception@test.com\",\n  \"password\": \"123456\"\n}"
+            },
+            "description": "⚠️ Replace with actual reception staff credentials."
+          }
+        }
+      ]
+    },
+    {
+      "name": "1. Read Operations",
+      "item": [
+        {
+          "name": "Get All Queues (with stats)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Has queues array', () => pm.expect(res.data).to.be.an('array'));",
+                  "pm.test('Queues have waitingCount', () => {",
+                  "    if (res.data.length > 0) {",
+                  "        pm.expect(res.data[0]).to.have.property('waitingCount');",
+                  "        pm.collectionVariables.set('queueId', res.data[0]._id);",
+                  "        console.log('📌 Auto-set queueId:', res.data[0]._id);",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/reception/queues",
+            "description": "Lists all active queues for the logged-in user's clinic.\nAuto-saves the first queueId for subsequent tests."
+          }
+        },
+        {
+          "name": "Get Tickets for Queue",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Has tickets array', () => pm.expect(res.data.tickets).to.be.an('array'));",
+                  "pm.test('Has waitingCount', () => pm.expect(res.data).to.have.property('waitingCount'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/reception/queues/{{queueId}}/tickets",
+            "description": "Returns all waiting + called tickets for a queue, sorted by number."
+          }
+        },
+        {
+          "name": "Get Queue Stats",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Has servedToday', () => pm.expect(res.data).to.have.property('servedToday'));",
+                  "pm.test('Has estimatedWaitTime', () => pm.expect(res.data).to.have.property('estimatedWaitTime'));",
+                  "pm.test('Has currentlyServing', () => pm.expect(res.data).to.have.property('currentlyServing'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/reception/queues/{{queueId}}/stats",
+            "description": "Returns queue performance stats: waitingCount, servedToday, avgServiceTime, currentlyServing."
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Call Next Flow",
+      "item": [
+        {
+          "name": "Call Next Ticket ✅",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Ticket status is called', () => pm.expect(res.data.status).to.equal('called'));",
+                  "pm.test('Has calledAt', () => pm.expect(res.data.calledAt).to.not.be.null);",
+                  "if (res.data) {",
+                  "    pm.collectionVariables.set('ticketId', res.data._id);",
+                  "    console.log('📌 Auto-set ticketId:', res.data._id, '| Number:', res.data.number);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/reception/queues/{{queueId}}/call-next",
+            "description": "Calls the next waiting ticket (lowest number).\nExpected: 200 OK with the called ticket.\nAuto-saves ticketId for Done/Recall tests."
+          }
+        },
+        {
+          "name": "Call Next Again (should FAIL 409) ❌",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 409 Conflict', () => pm.response.to.have.status(409));",
+                  "pm.test('Error message', () => {",
+                  "    const res = pm.response.json();",
+                  "    pm.expect(res.message).to.include('already');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/reception/queues/{{queueId}}/call-next",
+            "description": "🔒 INVARIANT TEST: Should return 409 because a ticket is already being served.\nThis validates the Singleton Active Rule."
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Recall",
+      "item": [
+        {
+          "name": "Recall Ticket (re-announce)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Ticket still called', () => pm.expect(res.data.status).to.equal('called'));",
+                  "pm.test('Same ticket returned', () => {",
+                  "    pm.expect(res.data._id).to.equal(pm.collectionVariables.get('ticketId'));",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "url": "{{baseUrl}}/reception/tickets/{{ticketId}}/recall",
+            "description": "Re-announces the currently called ticket.\nNo DB change — just re-emits the Socket event.\nVerifies the ticket status is still 'called'."
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Mark Done + Analytics",
+      "item": [
+        {
+          "name": "Mark Ticket Done ✅",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Ticket status is done', () => pm.expect(res.data.status).to.equal('done'));",
+                  "pm.test('Has completedAt', () => pm.expect(res.data.completedAt).to.not.be.null);",
+                  "pm.test('calledAt preserved', () => pm.expect(res.data.calledAt).to.not.be.null);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "url": "{{baseUrl}}/reception/tickets/{{ticketId}}/done",
+            "description": "Marks the active ticket as done.\nVerifies: completedAt is set, calledAt is preserved (for analytics), status is 'done'."
+          }
+        },
+        {
+          "name": "Mark Done Again (Idempotent) ✅",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200 (not error)', () => pm.response.to.have.status(200));",
+                  "const res = pm.response.json();",
+                  "pm.test('Message says already completed', () => {",
+                  "    pm.expect(res.message).to.include('already') || pm.expect(res.message).to.include('done');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "url": "{{baseUrl}}/reception/tickets/{{ticketId}}/done",
+            "description": "🔒 IDEMPOTENCY TEST: Calling done on an already-done ticket should return 200 (not error).\nThis handles frontend retry scenarios."
+          }
+        },
+        {
+          "name": "Verify Stats Updated",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('servedToday >= 1', () => pm.expect(res.data.servedToday).to.be.at.least(1));",
+                  "pm.test('avgServiceTime > 0', () => pm.expect(res.data.avgServiceTime).to.be.above(0));",
+                  "pm.test('currentlyServing is null', () => pm.expect(res.data.currentlyServing).to.be.null);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/reception/queues/{{queueId}}/stats",
+            "description": "Verify after marking done:\n- servedToday incremented\n- avgServiceTime calculated\n- currentlyServing is null (no active ticket)"
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Skip Flow",
+      "item": [
+        {
+          "name": "Call Next (to get a new ticket)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "if (res.data) {",
+                  "    pm.collectionVariables.set('ticketId', res.data._id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/reception/queues/{{queueId}}/call-next",
+            "description": "Call a new ticket so we can mark it done and test skip on the next one."
+          }
+        },
+        {
+          "name": "Mark Done (clear the active ticket)",
+          "request": {
+            "method": "PATCH",
+            "url": "{{baseUrl}}/reception/tickets/{{ticketId}}/done"
+          }
+        },
+        {
+          "name": "Get Tickets (find a waiting ticket to skip)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const waiting = res.data.tickets.filter(t => t.status === 'waiting');",
+                  "if (waiting.length > 0) {",
+                  "    pm.collectionVariables.set('ticketId', waiting[0]._id);",
+                  "    console.log('📌 Skip target — Ticket #' + waiting[0].number + ' | ID:', waiting[0]._id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/reception/queues/{{queueId}}/tickets"
+          }
+        },
+        {
+          "name": "Skip Ticket ⏭️",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Status still waiting', () => pm.expect(res.data.status).to.equal('waiting'));",
+                  "pm.test('Number changed (moved to end)', () => {",
+                  "    console.log('New ticket number:', res.data.number);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "url": "{{baseUrl}}/reception/tickets/{{ticketId}}/skip",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"queueId\": \"{{queueId}}\"\n}"
+            },
+            "description": "Moves the ticket to the end of the queue.\nVerifies: status stays 'waiting', number increases."
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. Call Specific",
+      "item": [
+        {
+          "name": "Get Tickets (pick one to call)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "const waiting = res.data.tickets.filter(t => t.status === 'waiting');",
+                  "if (waiting.length > 0) {",
+                  "    pm.collectionVariables.set('ticketId', waiting[0]._id);",
+                  "    console.log('📌 Will call specific — Ticket #' + waiting[0].number);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/reception/queues/{{queueId}}/tickets"
+          }
+        },
+        {
+          "name": "Call Specific Ticket 🎯",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Ticket status is called', () => pm.expect(res.data.status).to.equal('called'));",
+                  "pm.test('Correct ticket called', () => {",
+                  "    pm.expect(res.data._id).to.equal(pm.collectionVariables.get('ticketId'));",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "url": "{{baseUrl}}/reception/tickets/{{ticketId}}/call",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"queueId\": \"{{queueId}}\"\n}"
+            },
+            "description": "Calls a specific ticket by ID (out-of-order override).\nVerifies the exact ticket is now 'called'."
+          }
+        },
+        {
+          "name": "Cleanup — Mark Done",
+          "request": {
+            "method": "PATCH",
+            "url": "{{baseUrl}}/reception/tickets/{{ticketId}}/done"
+          }
+        }
+      ]
+    },
+    {
+      "name": "7. Edge Cases",
+      "item": [
+        {
+          "name": "Invalid Queue ID (should 400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 400', () => pm.response.to.have.status(400));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/reception/queues/invalid-id/tickets",
+            "description": "Tests Zod validation — should reject non-ObjectId params."
+          }
+        },
+        {
+          "name": "Non-existent Ticket Done (should 404)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 404', () => pm.response.to.have.status(404));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "url": "{{baseUrl}}/reception/tickets/000000000000000000000000/done",
+            "description": "Tests marking a non-existent ticket as done."
+          }
+        },
+        {
+          "name": "No Auth (should 401)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 401', () => pm.response.to.have.status(401));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "url": "{{baseUrl}}/reception/queues",
+            "description": "Tests that unauthenticated requests are rejected."
+          }
+        }
+      ]
+    }
+  ]
+}
