@@ -59,6 +59,12 @@
   margin-left: 15px;
 }
 
+.search-icon {
+  color: #64748b;
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
 .clinics-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -112,8 +118,6 @@
   font-size: 0.9rem;
   color: #64748b;
   margin-bottom: 12px;
-  display: flex;
-  align-items: center;
 }
 
 .clinic-info .description {
@@ -181,7 +185,8 @@
   padding: 100px 0;
 }
 
-.empty-icon {
-  font-size: 4rem;
-  margin-bottom: 20px;
+.loading-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 30px;
 }

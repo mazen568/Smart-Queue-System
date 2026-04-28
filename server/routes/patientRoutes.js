@@ -5,7 +5,10 @@ import {
   takeTicket, 
   getMyTicketStatus,
   getQueueWaitingList,
-  getQueueStats
+  getQueueStats,
+  listQueues,
+  getQueue,
+  listWaitingTicketsForQueue
 } from "../controllers/patientController.js";
 import { validateZodBody, validateZodParams } from "../middlewares/zodValidationMiddleware.js";
 import { takeTicketSchema, idParamSchema } from "../validations/patientValidations.js";
@@ -29,5 +32,10 @@ router.get("/queues/:id/waiting", validateZodParams(idParamSchema), getQueueWait
 
 // Get stats for a specific queue
 router.get("/queues/:id/stats", validateZodParams(idParamSchema), getQueueStats);
+
+// Additional endpoints to match the "public" API shape
+router.get("/queues", listQueues); // ?clinicId=...
+router.get("/queues/:id", validateZodParams(idParamSchema), getQueue);
+router.get("/tickets/queue/:queueId", listWaitingTicketsForQueue);
 
 export default router;

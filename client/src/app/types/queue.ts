@@ -4,6 +4,7 @@ export interface Clinic {
   description?: string;
   address?: string;
   logoUrl?: string;
+  activeQueuesCount?: number;
 }
 
 export interface Queue {

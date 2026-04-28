@@ -30,6 +30,7 @@ export const generateTicket = async ({ clinicId, queueId, customerName }) => {
   const position = await calculatePosition(queueId, ticket.createdAt);
 
   return {
+    queue,
     ticket,
     position,
     estimatedWaitTime: position * queue.avgServiceTime,

@@ -13,6 +13,12 @@ export const routes: Routes = [
     pathMatch: 'full',
   },
   {
+    path: 'join',
+    loadComponent: () =>
+      import('./features/patient/Components/join/join').then((c) => c.JoinComponent),
+    title: 'Join Queue',
+  },
+  {
     path: 'patient',
     component: Patient,
     children: [

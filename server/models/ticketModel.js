@@ -40,6 +40,9 @@ const ticketSchema = new Schema(
 // Performance optimization for queue position calculation
 ticketSchema.index({ queueId: 1, status: 1, createdAt: 1 });
 ticketSchema.index({ clinicId: 1, createdAt: -1 });
+ticketSchema.index({ status: 1 });
+ticketSchema.index({ queueId: 1 });
+ticketSchema.index({ clinicId: 1, queueId: 1 });
 
 const Ticket = mongoose.model("Ticket", ticketSchema);
 

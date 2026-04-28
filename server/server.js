@@ -6,6 +6,7 @@ import { errorHandler } from "./middlewares/errorHandling.js"
 import authRouter from "./routes/authRoutes.js"
 import adminRouter from "./routes/adminRoutes.js"
 import patientRouter from "./routes/patientRoutes.js"
+import publicRouter from "./routes/publicRoutes.js"
 import { initSocket } from "./config/socket.config.js"
 import cookieParser from "cookie-parser"
 import cors from "cors"
@@ -38,6 +39,8 @@ app.use(cors({
 
 app.use(`${baseURL}/auth`, authRouter)
 app.use(`${baseURL}/patient`, patientRouter)
+// Public, non-prefixed API for patient experience (browse/tickets/queues)
+app.use(`${baseURL}`, publicRouter)
 
 //protected routes
 app.use(`${baseURL}/admin`, adminRouter)

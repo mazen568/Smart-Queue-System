@@ -1,40 +1,49 @@
 <div class="clinics-container">
   <div class="header">
-    <h1>Select a Clinic</h1>
-    <p>Find the best doctor and join the queue from anywhere.</p>
+    <h1>Clinics</h1>
+    <p>Pick a clinic to view doctors and take a ticket.</p>
   </div>
 
   <div class="search-section">
     <div class="search-bar">
-      <span class="icon">🔍</span>
-      <input type="text" placeholder="Search clinics by name or address..." />
+      <span class="search-icon">Search</span>
+      <input
+        type="text"
+        [(ngModel)]="searchTerm"
+        (ngModelChange)="onSearchChange($event)"
+        placeholder="Search by name or address"
+        aria-label="Search clinics"
+      />
     </div>
   </div>
 
   <div class="clinics-grid" *ngIf="clinics$ | async as clinics; else loading">
     <div class="clinic-card" *ngFor="let clinic of clinics" [routerLink]="['/patient/clinic', clinic._id]">
-      <div class="clinic-image" [style.backgroundImage]="'url(' + (clinic.logoUrl || 'assets/default-clinic.jpg') + ')'"></div>
+      <div
+        class="clinic-image"
+        [style.backgroundImage]="'url(' + (clinic.logoUrl || 'assets/default-clinic.jpg') + ')'"
+      ></div>
       <div class="clinic-info">
         <h3>{{ clinic.name }}</h3>
-        <p class="address"><span class="icon">📍</span> {{ clinic.address || 'Location TBD' }}</p>
-        <p class="description">{{ clinic.description || 'No description available for this clinic.' }}</p>
+        <p class="address">{{ clinic.address || 'Address not provided' }}</p>
+        <p class="description">{{ clinic.description || 'No description available.' }}</p>
         <div class="card-footer">
-          <span class="badge">Open</span>
-          <button class="btn-join">Join Queue</button>
+          <span class="badge">{{ clinic.activeQueuesCount || 0 }} queues</span>
+          <button class="btn-join" type="button">View</button>
         </div>
       </div>
     </div>
 
     <div class="empty-state" *ngIf="clinics.length === 0">
-      <div class="empty-icon">🏥</div>
       <h2>No clinics found</h2>
-      <p>Try refining your search or check back later.</p>
+      <p>Try a different search.</p>
     </div>
   </div>
 
   <ng-template #loading>
     <div class="loading-grid">
-      <div class="skeleton-card" *ngFor="let i of [1,2,3,4,5,6]"></div>
+      <div class="skeleton-card" *ngFor="let i of [1, 2, 3, 4, 5, 6]"></div>
     </div>
   </ng-template>
 </div>
+

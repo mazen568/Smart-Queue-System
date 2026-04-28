@@ -5,11 +5,12 @@ import { PatientService } from '../../services/patient.service';
 import { SocketService } from '../../../../core/services/socket.service';
 import { Ticket, Queue } from '../../../../types/queue';
 import { Subscription } from 'rxjs';
+import { QrCodeComponent } from '../qr-code/qr-code';
 
 @Component({
   selector: 'app-ticket-status',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, QrCodeComponent],
   templateUrl: './ticket-status.html',
   styleUrl: './ticket-status.css',
 })
@@ -19,6 +20,7 @@ export class TicketStatusComponent implements OnInit, OnDestroy {
   estimatedWaitTime = 0;
   loading = true;
   private socketSub: Subscription | undefined;
+  mode: 'confirm' | 'track' = 'track';
 
   get queue(): any {
     return this.ticket?.queueId as any;
@@ -32,6 +34,7 @@ export class TicketStatusComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('ticketId');
+    this.mode = (this.route.snapshot.queryParamMap.get('mode') as any) === 'confirm' ? 'confirm' : 'track';
     if (id) {
       this.fetchStatus(id);
     }
@@ -49,6 +52,13 @@ export class TicketStatusComponent implements OnInit, OnDestroy {
           this.socketService.joinClinic(this.ticket.clinicId);
           this.setupSocketListeners();
         }
+
+        if (this.mode === 'confirm') {
+          this.requestNotifications();
+          try {
+            localStorage.setItem('activeTicketId', this.ticket._id);
+          } catch {}
+        }
       },
       error: () => {
         this.loading = false;
@@ -57,20 +67,33 @@ export class TicketStatusComponent implements OnInit, OnDestroy {
   }
 
   setupSocketListeners(): void {
-    this.socketSub = this.socketService.onEvent('queueUpdated').subscribe((data) => {
+    const sub = new Subscription();
+
+    sub.add(this.socketService.onEvent('queueUpdated').subscribe((data) => {
       if (this.ticket && data.queueId === (this.ticket.queueId as any)._id) {
         // Recalculate position based on live stats
         // In a real app, the server would broadcast specialized position updates
         this.refreshPosition();
       }
-    });
+    }));
 
-    this.socketService.onEvent('ticketCalled').subscribe((data) => {
+    sub.add(this.socketService.onEvent('ticketCalled').subscribe((data) => {
       if (this.ticket && data.ticketId === this.ticket._id) {
         this.ticket.status = 'called';
         this.triggerNotification();
       }
-    });
+    }));
+
+    sub.add(this.socketService.onEvent('ticketDone').subscribe((data) => {
+      if (this.ticket && data.ticketId === this.ticket._id) {
+        this.ticket.status = 'done';
+        try {
+          localStorage.removeItem('activeTicketId');
+        } catch {}
+      }
+    }));
+
+    this.socketSub = sub;
   }
 
   refreshPosition(): void {
@@ -92,6 +115,19 @@ export class TicketStatusComponent implements OnInit, OnDestroy {
     } else {
       alert('IT IS YOUR TURN! Please proceed.');
     }
+  }
+
+  requestNotifications(): void {
+    if (!('Notification' in window)) return;
+    if (Notification.permission === 'default') {
+      Notification.requestPermission().catch(() => {});
+    }
+  }
+
+  get ticketUrl(): string {
+    if (!this.ticket) return '';
+    // Use hashless absolute URL for QR
+    return `${window.location.origin}/patient/ticket/${this.ticket._id}`;
   }
 
   ngOnDestroy(): void {

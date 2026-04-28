@@ -1,27 +1,27 @@
 <div class="clinic-detail-container">
   <div class="back-nav" routerLink="/patient/clinics">
-    <span>←</span> Back to Clinics
+    <span class="back-arrow">&larr;</span> Back to Clinics
   </div>
 
   <div class="clinic-hero" *ngIf="clinic">
     <div class="clinic-brand">
-      <img [src]="clinic.logoUrl || 'assets/default-clinic.jpg'" alt="Logo" class="logo">
+      <img [src]="clinic.logoUrl || 'assets/default-clinic.jpg'" alt="Logo" class="logo" />
       <div class="clinic-titles">
         <h1>{{ clinic.name }}</h1>
-        <p><span class="icon">📍</span> {{ clinic.address }}</p>
+        <p class="clinic-address">{{ clinic.address }}</p>
       </div>
     </div>
     <p class="full-desc">{{ clinic.description }}</p>
   </div>
 
   <div class="queues-section">
-    <h2>Available Services & Doctors</h2>
-    <p class="subtitle">Select a service to join the virtual queue.</p>
+    <h2>Available Doctors</h2>
+    <p class="subtitle">Select a doctor to join the queue.</p>
 
-    <div class="queues-grid">
+    <div class="queues-grid" *ngIf="!loading">
       <div class="queue-card" *ngFor="let queue of queues">
         <div class="queue-header">
-          <div class="doctor-avatar">👨‍⚕️</div>
+          <div class="doctor-avatar">DR</div>
           <div class="queue-info">
             <h3>{{ queue.name }}</h3>
             <span class="status-dot" [class.active]="queue.isActive"></span>
@@ -31,7 +31,7 @@
 
         <div class="stats-row">
           <div class="stat">
-            <span class="label">Now Serving</span>
+            <span class="label">Latest Ticket</span>
             <span class="value">#{{ queue.currentNumber || '-' }}</span>
           </div>
           <div class="stat">
@@ -41,17 +41,53 @@
         </div>
 
         <div class="waitTime">
-          <span class="icon">⏱️</span> Est. Wait: <strong>{{ (queue.waitingCount || 0) * queue.avgServiceTime }} mins</strong>
+          Est. Wait: <strong>{{ (queue.waitingCount || 0) * queue.avgServiceTime }} mins</strong>
         </div>
 
-        <button class="btn-primary" (click)="takeTicket(queue._id)" [disabled]="!queue.isActive">
+        <button class="btn-primary" (click)="openTakeTicketDialog(queue)" [disabled]="!queue.isActive">
           Take a Ticket
         </button>
       </div>
     </div>
 
     <div class="loading-state" *ngIf="loading">
-      <p>Loading doctors and queue status...</p>
+      <p>Loading queues...</p>
+    </div>
+
+    <div class="empty-state" *ngIf="!loading && queues.length === 0">
+      <p>No active queues for this clinic.</p>
     </div>
   </div>
 </div>
+
+<div class="modal-backdrop" *ngIf="dialogOpen" (click)="closeDialog()"></div>
+<div class="modal" *ngIf="dialogOpen" role="dialog" aria-modal="true">
+  <div class="modal-header">
+    <h3>Confirm Ticket</h3>
+    <button class="icon-btn" (click)="closeDialog()" [disabled]="booking" aria-label="Close">x</button>
+  </div>
+  <div class="modal-body">
+    <div class="row">
+      <div class="label">Clinic</div>
+      <div class="value">{{ clinic?.name }}</div>
+    </div>
+    <div class="row">
+      <div class="label">Queue</div>
+      <div class="value">{{ selectedQueue?.name }}</div>
+    </div>
+    <label class="field">
+      <span class="field-label">Your Name (optional)</span>
+      <input class="text-input" [(ngModel)]="customerName" placeholder="Guest" [disabled]="booking" />
+    </label>
+    <div class="hint">
+      Estimated wait: {{ ((selectedQueue?.waitingCount || 0) * (selectedQueue?.avgServiceTime || 0)) }} mins
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button class="btn-secondary" (click)="closeDialog()" [disabled]="booking">Cancel</button>
+    <button class="btn-primary" (click)="confirmTakeTicket()" [disabled]="booking">
+      {{ booking ? 'Booking...' : 'Confirm' }}
+    </button>
+  </div>
+</div>
+
