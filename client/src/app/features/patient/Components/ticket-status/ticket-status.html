@@ -1,0 +1,51 @@
+<div class="tracker-container">
+  <div class="status-card" *ngIf="ticket">
+    <div class="header">
+      <div class="badge" [class.called]="ticket.status === 'called'">
+        {{ ticket.status === 'waiting' ? 'In Queue' : (ticket.status === 'called' ? 'YOUR TURN' : 'Done') }}
+      </div>
+      <h2>Ticket #{{ ticket.number }}</h2>
+      <p class="service-name">{{ queue?.name }}</p>
+    </div>
+
+    <div class="live-stats">
+      <div class="stat-main">
+        <span class="label">People Ahead</span>
+        <span class="value">{{ position }}</span>
+      </div>
+
+      <div class="progress-container">
+        <div class="progress-bar">
+          <div class="fill" [style.width]="(100 - (position * 10)) + '%'"></div>
+        </div>
+      </div>
+
+      <div class="stat-footer">
+        <div class="footer-item">
+          <span class="f-label">Estimated Wait</span>
+          <span class="f-value">{{ estimatedWaitTime }} mins</span>
+        </div>
+        <div class="footer-item">
+          <span class="f-label">Serving Now</span>
+          <span class="f-value">#{{ queue?.currentNumber }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="call-to-action" *ngIf="ticket.status === 'called'">
+      <div class="alert-box">
+        <span class="pulse-icon">🔔</span>
+        <h3>Please proceed to the doctor!</h3>
+      </div>
+    </div>
+
+    <div class="info-footer">
+      <p>Keep this page open to receive real-time updates. We'll alert you when it's your turn.</p>
+      <button class="btn-outline" routerLink="/patient/clinics">Leave Queue</button>
+    </div>
+  </div>
+
+  <div class="loading-state" *ngIf="loading">
+    <p>Connecting to live queue system...</p>
+  </div>
+</div>

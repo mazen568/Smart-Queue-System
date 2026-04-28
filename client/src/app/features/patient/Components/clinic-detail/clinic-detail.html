@@ -1,0 +1,57 @@
+<div class="clinic-detail-container">
+  <div class="back-nav" routerLink="/patient/clinics">
+    <span>←</span> Back to Clinics
+  </div>
+
+  <div class="clinic-hero" *ngIf="clinic">
+    <div class="clinic-brand">
+      <img [src]="clinic.logoUrl || 'assets/default-clinic.jpg'" alt="Logo" class="logo">
+      <div class="clinic-titles">
+        <h1>{{ clinic.name }}</h1>
+        <p><span class="icon">📍</span> {{ clinic.address }}</p>
+      </div>
+    </div>
+    <p class="full-desc">{{ clinic.description }}</p>
+  </div>
+
+  <div class="queues-section">
+    <h2>Available Services & Doctors</h2>
+    <p class="subtitle">Select a service to join the virtual queue.</p>
+
+    <div class="queues-grid">
+      <div class="queue-card" *ngFor="let queue of queues">
+        <div class="queue-header">
+          <div class="doctor-avatar">👨‍⚕️</div>
+          <div class="queue-info">
+            <h3>{{ queue.name }}</h3>
+            <span class="status-dot" [class.active]="queue.isActive"></span>
+            <span class="status-text">{{ queue.isActive ? 'Available' : 'Unavailable' }}</span>
+          </div>
+        </div>
+
+        <div class="stats-row">
+          <div class="stat">
+            <span class="label">Now Serving</span>
+            <span class="value">#{{ queue.currentNumber || '-' }}</span>
+          </div>
+          <div class="stat">
+            <span class="label">Waiting</span>
+            <span class="value">{{ queue.waitingCount || 0 }}</span>
+          </div>
+        </div>
+
+        <div class="waitTime">
+          <span class="icon">⏱️</span> Est. Wait: <strong>{{ (queue.waitingCount || 0) * queue.avgServiceTime }} mins</strong>
+        </div>
+
+        <button class="btn-primary" (click)="takeTicket(queue._id)" [disabled]="!queue.isActive">
+          Take a Ticket
+        </button>
+      </div>
+    </div>
+
+    <div class="loading-state" *ngIf="loading">
+      <p>Loading doctors and queue status...</p>
+    </div>
+  </div>
+</div>
