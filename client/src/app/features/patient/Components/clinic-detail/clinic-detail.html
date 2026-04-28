@@ -1,0 +1,118 @@
+<div class="clinic-detail-container">
+  <div class="back-nav" routerLink="/patient/clinics">
+    <span class="back-arrow">&larr;</span> Back to Clinics
+  </div>
+
+  <div class="skeleton-hero-brand" *ngIf="loading">
+    <div class="skel-logo"></div>
+    <div class="skel-titles">
+      <div class="skel-line h1"></div>
+      <div class="skel-line p"></div>
+    </div>
+  </div>
+
+  <div class="clinic-hero" *ngIf="!loading && clinic">
+    <div class="clinic-brand">
+      <img [src]="clinic.logoUrl || 'assets/default-clinic.jpg'" 
+           (error)="$any($event.target).src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZTEzNDM0Ij48L3JlY3Q+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSIgZm9udC1zaXplPSIyMCIgZm9udC1mYW1pbHk9IkFyaWFsIj5Mb2dvPC90ZXh0Pjwvc3ZnPg=='; $any($event.target).onerror = null"
+           alt="Logo" class="logo" />
+      <div class="clinic-titles">
+        <h1>{{ clinic.name }}</h1>
+        <p class="clinic-address">
+          <span class="icon">📍</span> {{ clinic.address || 'Address not listed' }}
+        </p>
+      </div>
+    </div>
+    <p class="full-desc">{{ clinic.description || 'No description available for this clinic.' }}</p>
+  </div>
+
+  <div class="queues-section">
+    <h2>Available Doctors</h2>
+    <p class="subtitle">Select a doctor to join the queue.</p>
+
+    <div class="queues-grid" *ngIf="!loading; else skeletonGrid">
+      <div class="queue-card" *ngFor="let queue of queues">
+        <div class="queue-header">
+          <div class="doctor-avatar">DR</div>
+          <div class="queue-info">
+            <h3>{{ queue.name }}</h3>
+            <span class="status-dot" [class.active]="queue.isActive"></span>
+            <span class="status-text">{{ queue.isActive ? 'Available' : 'Unavailable' }}</span>
+          </div>
+        </div>
+
+        <div class="stats-row">
+          <div class="stat">
+            <span class="label">Latest Ticket</span>
+            <span class="value">#{{ queue.currentNumber || '-' }}</span>
+          </div>
+          <div class="stat">
+            <span class="label">Waiting</span>
+            <span class="value">{{ queue.waitingCount || 0 }}</span>
+          </div>
+        </div>
+
+        <div class="waitTime">
+          Est. Wait: <strong>{{ (queue.waitingCount || 0) * queue.avgServiceTime }} mins</strong>
+        </div>
+
+        <button class="btn-primary" (click)="openTakeTicketDialog(queue)" [disabled]="!queue.isActive">
+          Take a Ticket
+        </button>
+      </div>
+
+      <div class="empty-state" *ngIf="queues.length === 0">
+        <p>No active queues for this clinic.</p>
+      </div>
+    </div>
+
+    <ng-template #skeletonGrid>
+      <div class="queues-grid skeleton">
+        <div class="queue-card skeleton-card" *ngFor="let i of [1, 2, 3]">
+          <div class="skeleton-header"></div>
+          <div class="skeleton-stats"></div>
+          <div class="skeleton-btn"></div>
+        </div>
+      </div>
+    </ng-template>
+  </div>
+</div>
+
+<app-modal 
+  *ngIf="dialogOpen" 
+  title="Confirm Ticket" 
+  primaryActionLabel="Confirm"
+  [isPrimaryLoading]="booking"
+  (close)="closeDialog()"
+  (primaryAction)="confirmTakeTicket()">
+  
+  <div class="booking-container">
+    <div class="row">
+      <div class="label">Clinic</div>
+      <div class="value">{{ clinic?.name }}</div>
+    </div>
+    <div class="row">
+      <div class="label">Queue</div>
+      <div class="value">{{ selectedQueue?.name }}</div>
+    </div>
+    
+    <div class="field">
+      <label class="field-label" for="customerName">Your Name (optional)</label>
+      <input 
+        id="customerName"
+        class="text-input" 
+        [(ngModel)]="customerName" 
+        placeholder="Guest" 
+        [disabled]="booking" 
+        autocomplete="off"
+      />
+    </div>
+
+    <div class="hint">
+      Estimated wait: {{ ((selectedQueue?.waitingCount || 0) * (selectedQueue?.avgServiceTime || 0)) }} mins
+    </div>
+  </div>
+</app-modal>
+
+<app-spinner *ngIf="booking" message="Issuing your ticket..."></app-spinner>
+

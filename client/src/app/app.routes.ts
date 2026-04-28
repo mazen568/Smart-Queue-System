@@ -13,6 +13,12 @@ export const routes: Routes = [
     pathMatch: 'full',
   },
   {
+    path: 'join',
+    loadComponent: () =>
+      import('./features/patient/Components/join/join').then((c) => c.JoinComponent),
+    title: 'Join Queue',
+  },
+  {
     path: 'patient',
     component: Patient,
     children: [
@@ -24,7 +30,17 @@ export const routes: Routes = [
       {
         path: 'clinics',
         loadComponent: () =>
-          import('./features/patient/Components/clinics/clinics').then((c) => c.Clinics),
+          import('./features/patient/Components/clinics/clinics').then((c) => c.ClinicsComponent),
+      },
+      {
+        path: 'clinic/:id',
+        loadComponent: () =>
+          import('./features/patient/Components/clinic-detail/clinic-detail').then((c) => c.ClinicDetailComponent),
+      },
+      {
+        path: 'ticket/:ticketId',
+        loadComponent: () =>
+          import('./features/patient/Components/ticket-status/ticket-status').then((c) => c.TicketStatusComponent),
       },
     ],
   },

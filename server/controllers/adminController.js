@@ -1,7 +1,9 @@
 import Clinic from "../models/clinicModel.js";
 import Queue from "../models/queueModel.js";
 import User from "../models/userModel.js";
+import Ticket from "../models/ticketModel.js";
 import { AppError } from "../helpers/AppError.js";
+import { getIO } from "../config/socket.config.js";
 
 // @desc    Get current clinic details
 // @route   GET /api/admin/clinic
@@ -312,6 +314,84 @@ export const getOverviewStats = async (req, res, next) => {
       },
       message: "Overview stats fetched successfully",
     });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// --- Phase X: Ticket Operations (for real-time patient tracking) ---
+
+// @desc    Mark a ticket as called (Pick from waiting)
+// @route   POST /api/admin/tickets/:id/call
+// @access  Private (Admin)
+export const callTicket = async (req, res, next) => {
+  try {
+    // Atomic update: only call if it's currently waiting
+    const ticket = await Ticket.findOneAndUpdate(
+      { 
+        _id: req.params.id, 
+        clinicId: req.user.clinicId, 
+        status: "waiting" 
+      },
+      { 
+        $set: { 
+          status: "called", 
+          calledAt: new Date() 
+        } 
+      },
+      { new: true }
+    );
+
+    if (!ticket) {
+      return next(new AppError("Ticket not found, unauthorized, or already processed", 404));
+    }
+
+    const io = getIO();
+    io.to(`clinic:${ticket.clinicId}`).emit("ticketCalled", {
+      ticketId: ticket._id,
+      number: ticket.number,
+      queueId: ticket.queueId,
+    });
+
+    res.status(200).json({ success: true, data: ticket });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Mark a ticket as done
+// @route   POST /api/admin/tickets/:id/done
+// @access  Private (Admin)
+export const completeTicket = async (req, res, next) => {
+  try {
+    // Atomic update: only complete if it's currently called
+    const ticket = await Ticket.findOneAndUpdate(
+      { 
+        _id: req.params.id, 
+        clinicId: req.user.clinicId, 
+        status: "called" 
+      },
+      { 
+        $set: { 
+          status: "done", 
+          completedAt: new Date() 
+        } 
+      },
+      { new: true }
+    );
+
+    if (!ticket) {
+      return next(new AppError("Ticket not found, unauthorized, or not in 'called' state", 404));
+    }
+
+    const io = getIO();
+    io.to(`clinic:${ticket.clinicId}`).emit("ticketDone", {
+      ticketId: ticket._id,
+      number: ticket.number,
+      queueId: ticket.queueId,
+    });
+
+    res.status(200).json({ success: true, data: ticket });
   } catch (error) {
     next(error);
   }

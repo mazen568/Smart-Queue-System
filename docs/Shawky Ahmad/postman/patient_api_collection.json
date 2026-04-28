@@ -1,0 +1,167 @@
+{
+	"info": {
+		"_postman_id": "846fa050-208b-434e-bc88-1d311929a895",
+		"name": "Smart Queue System - Patient API",
+		"description": "API collection for the Patient Experience (Member 2).",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Clinics",
+			"item": [
+				{
+					"name": "List All Clinics",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{api_url}}/patient/clinics",
+							"host": [
+								"{{api_url}}"
+							],
+							"path": [
+								"patient",
+								"clinics"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Clinic Details",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{api_url}}/patient/clinics/:id",
+							"host": [
+								"{{api_url}}"
+							],
+							"path": [
+								"patient",
+								"clinics",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Tickets",
+			"item": [
+				{
+					"name": "Issue New Ticket",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"clinicId\": \"\",\n    \"queueId\": \"\",\n    \"customerName\": \"Guest\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{api_url}}/patient/tickets",
+							"host": [
+								"{{api_url}}"
+							],
+							"path": [
+								"patient",
+								"tickets"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Ticket Status",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{api_url}}/patient/tickets/:id",
+							"host": [
+								"{{api_url}}"
+							],
+							"path": [
+								"patient",
+								"tickets",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Cancel Ticket (Leave Queue)",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{api_url}}/patient/tickets/:id",
+							"host": [
+								"{{api_url}}"
+							],
+							"path": [
+								"patient",
+								"tickets",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "api_url",
+			"value": "http://localhost:3000/api/v1",
+			"type": "string"
+		}
+	]
+}

@@ -1,0 +1,87 @@
+<div class="tracker-container">
+  <div class="skeleton-tracker" *ngIf="loading">
+    <div class="skel-header"></div>
+    <div class="skel-hero"></div>
+    <div class="skel-stats"></div>
+    <div class="skel-footer"></div>
+  </div>
+
+  <div class="status-card" *ngIf="!loading && ticket">
+    <div class="header">
+      <div class="badge" [class.called]="ticket.status === 'called'" [class.done]="ticket.status === 'done'">
+        {{ ticket.status === 'waiting' ? 'Waiting' : (ticket.status === 'called' ? 'Called' : 'Done') }}
+      </div>
+      <h2>Ticket #{{ ticket.number }}</h2>
+      <p class="service-name">{{ queue?.name }}</p>
+    </div>
+
+    <div class="confirm" *ngIf="mode === 'confirm' && ticket.status !== 'done'">
+      <div class="confirm-row">
+        <div class="confirm-left">
+          <div class="confirm-title">Your ticket is booked.</div>
+          <div class="confirm-sub">Scan this QR to reopen the tracker on your phone.</div>
+        </div>
+        <div class="confirm-right">
+          <app-qr-code [value]="ticketUrl"></app-qr-code>
+        </div>
+      </div>
+      <div class="confirm-actions">
+        <a class="btn-outline" routerLink="/patient/clinics">Back to clinics</a>
+        <a class="btn-primary" [routerLink]="['/patient/ticket', ticket._id]" [queryParams]="{ mode: 'track' }"
+          >Track my ticket</a
+        >
+      </div>
+    </div>
+
+    <div class="live-stats" *ngIf="ticket.status !== 'done'">
+      <div class="stat-main">
+        <span class="label">People Ahead</span>
+        <span class="value">{{ position }}</span>
+      </div>
+
+      <div class="stat-footer">
+        <div class="footer-item">
+          <span class="f-label">Estimated Wait</span>
+          <span class="f-value">{{ estimatedWaitTime }} mins</span>
+        </div>
+        <div class="footer-item">
+          <span class="f-label">Latest Ticket</span>
+          <span class="f-value">#{{ queue?.currentNumber || '-' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="call-to-action" *ngIf="ticket.status === 'called'">
+      <div class="alert-box">
+        <h3>YOUR TURN</h3>
+        <p>Please proceed to the doctor.</p>
+      </div>
+    </div>
+
+    <div class="complete" *ngIf="ticket.status === 'done'">
+      <h3>Session Complete</h3>
+      <p>This ticket is marked done.</p>
+      <a class="btn-primary" routerLink="/patient/clinics">Take a new ticket</a>
+    </div>
+
+    <div class="info-footer" *ngIf="ticket.status !== 'done'">
+      <p>Keep this page open for live updates.</p>
+      <button class="btn-outline" (click)="cancelDialogOpen = true">Leave Queue</button>
+    </div>
+  </div>
+</div>
+
+<app-modal 
+  *ngIf="cancelDialogOpen" 
+  title="Leave Queue?" 
+  primaryActionLabel="Yes, Leave"
+  secondaryActionLabel="Stay"
+  [isPrimaryLoading]="isCancelling"
+  (close)="cancelDialogOpen = false"
+  (primaryAction)="confirmLeave()">
+  
+  <div class="cancel-msg">
+    <p>Are you sure you want to leave the queue? Your ticket <strong>#{{ ticket?.number }}</strong> will be cancelled and you will lose your position.</p>
+  </div>
+</app-modal>
+
