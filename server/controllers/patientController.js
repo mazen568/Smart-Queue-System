@@ -46,9 +46,26 @@ export const getClinicDetails = async (req, res, next) => {
 
     const queues = await Queue.find({ clinicId: clinic._id, isActive: true }).lean();
     
+    // Aggregate waiting counts in one go for efficiency
+    const queueIds = queues.map((q) => q._id);
+    const waits = await Ticket.aggregate([
+      { $match: { queueId: { $in: queueIds }, status: "waiting" } },
+      { $group: { _id: "$queueId", waitingCount: { $sum: 1 } } },
+    ]);
+    const waitMap = new Map(waits.map((w) => [String(w._id), w.waitingCount]));
+
+    const enrichedQueues = queues.map((q) => {
+      const waitingCount = waitMap.get(String(q._id)) || 0;
+      return {
+        ...q,
+        waitingCount,
+        estimatedWaitTime: waitingCount * (q.avgServiceTime || 0),
+      };
+    });
+
     res.status(200).json({
       success: true,
-      data: { clinic, queues },
+      data: { clinic, queues: enrichedQueues },
     });
   } catch (error) {
     next(error);
@@ -121,6 +138,30 @@ export const getMyTicketStatus = async (req, res, next) => {
     res.status(200).json({
       success: true,
       data: status,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Cancel a ticket (Leave the queue)
+ */
+export const cancelTicket = async (req, res, next) => {
+  try {
+    const ticket = await ticketService.cancelTicket(req.params.id);
+    
+    // Broadcast update to the clinic
+    const waitingCount = await Ticket.countDocuments({ queueId: ticket.queueId, status: "waiting" });
+    const io = getIO();
+    io.to(`clinic:${ticket.clinicId}`).emit("queueUpdated", {
+      queueId: ticket.queueId,
+      waitingCount,
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "Ticket cancelled successfully",
     });
   } catch (error) {
     next(error);

@@ -4,6 +4,7 @@ import {
   getClinicDetails, 
   takeTicket, 
   getMyTicketStatus,
+  cancelTicket,
   getQueueWaitingList,
   getQueueStats,
   listQueues,
@@ -26,6 +27,9 @@ router.post("/tickets", validateZodBody(takeTicketSchema), takeTicket);
 
 // Track status of an existing ticket
 router.get("/tickets/:id", validateZodParams(idParamSchema), getMyTicketStatus);
+
+// Cancel/Leave a ticket
+router.delete("/tickets/:id", validateZodParams(idParamSchema), cancelTicket);
 
 // Get waiting list for a specific queue
 router.get("/queues/:id/waiting", validateZodParams(idParamSchema), getQueueWaitingList);

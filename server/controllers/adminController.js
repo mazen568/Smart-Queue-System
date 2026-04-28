@@ -321,20 +321,30 @@ export const getOverviewStats = async (req, res, next) => {
 
 // --- Phase X: Ticket Operations (for real-time patient tracking) ---
 
-// @desc    Mark a ticket as called
+// @desc    Mark a ticket as called (Pick from waiting)
 // @route   POST /api/admin/tickets/:id/call
 // @access  Private (Admin)
 export const callTicket = async (req, res, next) => {
   try {
-    const ticket = await Ticket.findById(req.params.id);
-    if (!ticket) return next(new AppError("Ticket not found", 404));
-    if (String(ticket.clinicId) !== String(req.user.clinicId)) {
-      return next(new AppError("Unauthorized for this clinic", 403));
-    }
+    // Atomic update: only call if it's currently waiting
+    const ticket = await Ticket.findOneAndUpdate(
+      { 
+        _id: req.params.id, 
+        clinicId: req.user.clinicId, 
+        status: "waiting" 
+      },
+      { 
+        $set: { 
+          status: "called", 
+          calledAt: new Date() 
+        } 
+      },
+      { new: true }
+    );
 
-    ticket.status = "called";
-    ticket.calledAt = new Date();
-    await ticket.save();
+    if (!ticket) {
+      return next(new AppError("Ticket not found, unauthorized, or already processed", 404));
+    }
 
     const io = getIO();
     io.to(`clinic:${ticket.clinicId}`).emit("ticketCalled", {
@@ -354,15 +364,25 @@ export const callTicket = async (req, res, next) => {
 // @access  Private (Admin)
 export const completeTicket = async (req, res, next) => {
   try {
-    const ticket = await Ticket.findById(req.params.id);
-    if (!ticket) return next(new AppError("Ticket not found", 404));
-    if (String(ticket.clinicId) !== String(req.user.clinicId)) {
-      return next(new AppError("Unauthorized for this clinic", 403));
-    }
+    // Atomic update: only complete if it's currently called
+    const ticket = await Ticket.findOneAndUpdate(
+      { 
+        _id: req.params.id, 
+        clinicId: req.user.clinicId, 
+        status: "called" 
+      },
+      { 
+        $set: { 
+          status: "done", 
+          completedAt: new Date() 
+        } 
+      },
+      { new: true }
+    );
 
-    ticket.status = "done";
-    ticket.completedAt = new Date();
-    await ticket.save();
+    if (!ticket) {
+      return next(new AppError("Ticket not found, unauthorized, or not in 'called' state", 404));
+    }
 
     const io = getIO();
     io.to(`clinic:${ticket.clinicId}`).emit("ticketDone", {

@@ -1,5 +1,5 @@
 import { HttpErrorResponse, HttpInterceptorFn } from '@angular/common/http';
-import { inject } from '@angular/core';
+import { inject, Injector } from '@angular/core';
 import { BehaviorSubject, catchError, filter, switchMap, take, throwError } from 'rxjs';
 import { AuthService } from '../../features/auth/services/auth-service';
 import { environment } from '../../../environments/environment';
@@ -21,11 +21,13 @@ function isAuthEndpoint(url: string) {
 }
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
-  const auth = inject(AuthService);
-
+  const injector = inject(Injector);
+  
   const apiRequest = isApiUrl(req.url);
   const protectedRequest = apiRequest && !isAuthEndpoint(req.url);
 
+  // Delay service retrieval to avoid circular dependency issues at startup
+  const auth = injector.get(AuthService);
   const token = auth.getToken();
 
   // Enable cookie-based auth (needed for refresh cookie flow).

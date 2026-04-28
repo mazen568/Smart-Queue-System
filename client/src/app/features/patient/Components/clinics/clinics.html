@@ -4,6 +4,14 @@
     <p>Pick a clinic to view doctors and take a ticket.</p>
   </div>
 
+  <div class="active-ticket-banner" *ngIf="activeTicketId">
+    <div class="banner-content">
+      <span class="pulse-dot"></span>
+      <p>You have an active ticket in progress</p>
+      <a [routerLink]="['/patient/ticket', activeTicketId]" class="btn-track">Track Ticket</a>
+    </div>
+  </div>
+
   <div class="search-section">
     <div class="search-bar">
       <span class="search-icon">Search</span>
@@ -42,7 +50,14 @@
 
   <ng-template #loading>
     <div class="loading-grid">
-      <div class="skeleton-card" *ngFor="let i of [1, 2, 3, 4, 5, 6]"></div>
+      <div class="skeleton-card" *ngFor="let i of [1, 2, 3, 4, 5, 6]">
+        <div class="skeleton-img"></div>
+        <div class="skeleton-content">
+          <div class="skeleton-line title"></div>
+          <div class="skeleton-line text"></div>
+          <div class="skeleton-line text short"></div>
+        </div>
+      </div>
     </div>
   </ng-template>
 </div>

@@ -1,6 +1,9 @@
 <div class="tracker-container">
-  <div class="loading-state" *ngIf="loading">
-    <p>Loading ticket...</p>
+  <div class="skeleton-tracker" *ngIf="loading">
+    <div class="skel-header"></div>
+    <div class="skel-hero"></div>
+    <div class="skel-stats"></div>
+    <div class="skel-footer"></div>
   </div>
 
   <div class="status-card" *ngIf="!loading && ticket">
@@ -63,8 +66,22 @@
 
     <div class="info-footer" *ngIf="ticket.status !== 'done'">
       <p>Keep this page open for live updates.</p>
-      <button class="btn-outline" routerLink="/patient/clinics">Leave</button>
+      <button class="btn-outline" (click)="cancelDialogOpen = true">Leave Queue</button>
     </div>
   </div>
 </div>
+
+<app-modal 
+  *ngIf="cancelDialogOpen" 
+  title="Leave Queue?" 
+  primaryActionLabel="Yes, Leave"
+  secondaryActionLabel="Stay"
+  [isPrimaryLoading]="isCancelling"
+  (close)="cancelDialogOpen = false"
+  (primaryAction)="confirmLeave()">
+  
+  <div class="cancel-msg">
+    <p>Are you sure you want to leave the queue? Your ticket <strong>#{{ ticket?.number }}</strong> will be cancelled and you will lose your position.</p>
+  </div>
+</app-modal>
 

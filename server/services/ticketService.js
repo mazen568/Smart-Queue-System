@@ -74,3 +74,19 @@ const calculatePosition = async (queueId, createdAt) => {
     createdAt: { $lt: createdAt },
   });
 };
+
+/**
+ * Cancels a ticket and returns the updated state.
+ */
+export const cancelTicket = async (ticketId) => {
+  const ticket = await Ticket.findById(ticketId);
+  if (!ticket) throw new AppError("Ticket not found.", 404);
+  
+  if (ticket.status === 'done') {
+    throw new AppError("Cannot cancel a completed ticket.", 400);
+  }
+
+  ticket.status = 'cancelled';
+  await ticket.save();
+  return ticket;
+};

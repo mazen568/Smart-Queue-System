@@ -20,7 +20,7 @@ const ticketSchema = new Schema(
     },
     status: {
       type: String,
-      enum: ["waiting", "called", "done"],
+      enum: ["waiting", "called", "done", "cancelled"],
       default: "waiting",
     },
     customerName: {

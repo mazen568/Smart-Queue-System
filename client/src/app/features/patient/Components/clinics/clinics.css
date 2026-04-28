@@ -151,6 +151,7 @@
   margin-bottom: var(--space-8);
   display: -webkit-box;
   -webkit-line-clamp: 3;
+  line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
   height: 4.8em;
@@ -194,25 +195,63 @@
 
 /* Skeletons */
 .skeleton-card {
-  height: 440px;
+  height: 480px;
   background: var(--surface);
   border-radius: var(--radius-xl);
   border: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.skeleton-img {
+  height: 220px;
+  background: var(--background);
   position: relative;
   overflow: hidden;
 }
 
-.skeleton-card::after {
+.skeleton-content {
+  padding: var(--space-8);
+  flex: 1;
+}
+
+.skeleton-line {
+  height: 1rem;
+  background: var(--background);
+  border-radius: var(--radius-sm);
+  margin-bottom: 1rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.skeleton-line.title {
+  height: 2rem;
+  width: 70%;
+  margin-bottom: 2rem;
+}
+
+.skeleton-line.text.short {
+  width: 40%;
+}
+
+.skeleton-img::after,
+.skeleton-line::after {
   content: "";
   position: absolute;
   inset: 0;
   background: linear-gradient(
     90deg,
     transparent 0,
-    rgba(255, 255, 255, 0.6) 50%,
+    rgba(255, 255, 255, 0.4) 50%,
     transparent 100%
   );
-  animation: shimmer 1.8s infinite;
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(100%); }
 }
 
 .empty-state {
@@ -233,4 +272,64 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
   gap: var(--space-8);
+}
+
+/* Active Ticket Banner */
+.active-ticket-banner {
+  background: var(--surface);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4) var(--space-6);
+  margin-bottom: var(--space-8);
+  box-shadow: var(--shadow-glow);
+  animation: slide-down 0.5s var(--ease-out-soft);
+}
+
+.banner-content {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.pulse-dot {
+  width: 10px;
+  height: 10px;
+  background: var(--accent);
+  border-radius: 50%;
+  box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4);
+  animation: pulse-ring 2s infinite;
+}
+
+.banner-content p {
+  margin: 0;
+  font-weight: 600;
+  color: var(--foreground);
+  flex-grow: 1;
+}
+
+.btn-track {
+  background: var(--accent);
+  color: white;
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-md);
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 700;
+  transition: all 0.2s;
+}
+
+.btn-track:hover {
+  background: var(--accent-hover);
+  transform: translateY(-1px);
+}
+
+@keyframes pulse-ring {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7); }
+  70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+}
+
+@keyframes slide-down {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
 }

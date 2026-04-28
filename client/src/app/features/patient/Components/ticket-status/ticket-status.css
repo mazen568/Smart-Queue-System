@@ -263,3 +263,74 @@
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
 }
+
+/* Skeletons */
+.skeleton-tracker {
+  background: var(--surface);
+  border-radius: var(--radius-xl);
+  padding: var(--space-12);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-zone);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+}
+
+.skel-header {
+  height: 2rem;
+  width: 40%;
+  margin: 0 auto;
+  background: var(--background);
+  border-radius: var(--radius-sm);
+  position: relative;
+  overflow: hidden;
+}
+
+.skel-hero {
+  height: 6rem;
+  width: 80%;
+  margin: 0 auto;
+  background: var(--background);
+  border-radius: var(--radius-lg);
+  position: relative;
+  overflow: hidden;
+}
+
+.skel-stats {
+  height: 12rem;
+  width: 100%;
+  background: var(--background);
+  border-radius: var(--radius-xl);
+  position: relative;
+  overflow: hidden;
+}
+
+.skel-footer {
+  height: 3rem;
+  width: 100%;
+  background: var(--background);
+  border-radius: var(--radius-lg);
+  position: relative;
+  overflow: hidden;
+}
+
+.skel-header::after,
+.skel-hero::after,
+.skel-stats::after,
+.skel-footer::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0,
+    rgba(255, 255, 255, 0.4) 50%,
+    transparent 100%
+  );
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(100%); }
+}
