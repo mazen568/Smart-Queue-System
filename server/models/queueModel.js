@@ -27,11 +27,17 @@ const queueSchema = new Schema(
       type: Boolean,
       default: true,
     },
+    totalServedCount: {
+      type: Number,
+      default: 0,
+    },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 queueSchema.index({ clinicId: 1 });
+
+queueSchema.index({ clinicId: 1, isActive: 1 });
 
 const queueModel = mongoose.model("Queue", queueSchema);
 
