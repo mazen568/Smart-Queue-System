@@ -1,0 +1,26 @@
+<div class="toast-container">
+  @for (toast of toastService.toasts(); track toast.id) {
+    <div
+      class="toast"
+      [class.toast-success]="toast.type === 'success'"
+      [class.toast-error]="toast.type === 'error'"
+      [class.toast-warning]="toast.type === 'warning'"
+      [class.toast-info]="toast.type === 'info'"
+      [class.toast-removing]="toast.removing"
+      role="alert"
+      aria-live="assertive"
+    >
+      <i class="toast-icon fas"
+        [class.fa-check-circle]="toast.type === 'success'"
+        [class.fa-times-circle]="toast.type === 'error'"
+        [class.fa-exclamation-triangle]="toast.type === 'warning'"
+        [class.fa-info-circle]="toast.type === 'info'"
+      ></i>
+      <p>{{ toast.message }}</p>
+      <button class="toast-close" (click)="toastService.removeToast(toast.id)" aria-label="Dismiss">
+        <i class="fas fa-times"></i>
+      </button>
+      <div class="toast-progress"></div>
+    </div>
+  }
+</div>
