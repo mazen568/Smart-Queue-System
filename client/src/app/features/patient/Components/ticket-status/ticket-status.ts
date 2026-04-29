@@ -12,7 +12,7 @@ import { ModalComponent } from '../../../../shared/Components/modal/modal';
 @Component({
   selector: 'app-ticket-status',
   standalone: true,
-  imports: [CommonModule, RouterModule, QrCodeComponent, SpinnerComponent, ModalComponent],
+  imports: [CommonModule, RouterModule, QrCodeComponent, ModalComponent],
   templateUrl: './ticket-status.html',
   styleUrl: './ticket-status.css',
 })
