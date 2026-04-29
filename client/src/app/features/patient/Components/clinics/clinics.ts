@@ -13,7 +13,7 @@ import { getClinicLogoUrl } from '../../../../shared/utils/url-utils';
 @Component({
   selector: 'app-clinics',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, SpinnerComponent],
+  imports: [CommonModule, RouterModule, FormsModule],
   templateUrl: './clinics.html',
   styleUrl: './clinics.css',
 })

@@ -33,3 +33,17 @@ export interface TicketStatusResponse {
   position: number;
   estimatedWaitTime: number;
 }
+
+export interface QueueTicketsResponse {
+  tickets: Ticket[];
+  calledTicket: Ticket | null;
+  nextTicket: Ticket | null;
+  waitingCount: number;
+  totalTickets: number;
+}
+
+export interface QueueStatsResponse extends Queue {
+  servedToday: number;
+  currentlyServing: number | null;
+  estimatedWaitTime: number;
+}
