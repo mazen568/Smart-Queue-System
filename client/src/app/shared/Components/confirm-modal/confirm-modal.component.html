@@ -1,0 +1,33 @@
+@if (dialogService.state().isOpen) {
+<div class="confirm-overlay" (click)="dialogService.onCancel()">
+  <div
+    class="confirm-modal"
+    [class.type-danger]="dialogService.state().type === 'danger'"
+    [class.type-warning]="dialogService.state().type === 'warning'"
+    [class.type-info]="dialogService.state().type === 'info'"
+    (click)="$event.stopPropagation()"
+    role="alertdialog"
+    aria-modal="true"
+  >
+    <div class="confirm-icon">
+      @switch (dialogService.state().type) {
+        @case ('danger') {
+          <i class="fas fa-trash-alt"></i>
+        }
+        @case ('warning') {
+          <i class="fas fa-exclamation-triangle"></i>
+        }
+        @case ('info') {
+          <i class="fas fa-info-circle"></i>
+        }
+      }
+    </div>
+    <h3>{{ dialogService.state().title }}</h3>
+    <p>{{ dialogService.state().message }}</p>
+    <div class="confirm-actions">
+      <button class="btn-cancel" (click)="dialogService.onCancel()">{{ dialogService.state().cancelText }}</button>
+      <button class="btn-confirm" (click)="dialogService.onConfirm()">{{ dialogService.state().confirmText }}</button>
+    </div>
+  </div>
+</div>
+}

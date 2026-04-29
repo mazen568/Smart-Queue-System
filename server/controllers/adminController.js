@@ -295,22 +295,35 @@ export const getOverviewStats = async (req, res, next) => {
   try {
     const clinicId = req.user.clinicId;
 
-    const [queuesCount, staffCount] = await Promise.all([
-      Queue.countDocuments({ clinicId, isActive: { $ne: false } }),
-      User.countDocuments({ clinicId, role: "reception" }),
-    ]);
+    // Start of today (midnight) for daily stats
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
 
-    // TODO: Add Tickets and Credits count when models are available
-    // For now, returning 0/placeholder
-    
+    const [queuesCount, staffCount, ticketsServedToday, currentlyWaiting] =
+      await Promise.all([
+        Queue.countDocuments({ clinicId, isActive: { $ne: false } }),
+        User.countDocuments({ clinicId, role: "reception" }),
+        Ticket.countDocuments({
+          clinicId,
+          status: "done",
+          createdAt: { $gte: todayStart },
+        }),
+        Ticket.countDocuments({
+          clinicId,
+          status: "waiting",
+        }),
+      ]);
+
+    // TODO: Add Credits count when model is available
+
     res.status(200).json({
       success: true,
       data: {
         queuesCount,
         staffCount,
-        ticketsServedToday: 0, 
-        currentlyWaiting: 0,
-        creditBalance: 0, 
+        ticketsServedToday,
+        currentlyWaiting,
+        creditBalance: 0,
       },
       message: "Overview stats fetched successfully",
     });
