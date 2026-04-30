@@ -126,8 +126,8 @@
 
 .tv-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 24px;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 32px;
   flex: 1;
   align-content: start;
 }
@@ -135,8 +135,8 @@
 .tv-card {
   background: #0B1325;
   border: 1px solid #1e293b;
-  border-radius: 16px;
-  padding: 48px 24px;
+  border-radius: 20px;
+  padding: 40px 24px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -156,14 +156,14 @@
 }
 
 .tv-card-header h2 {
-  font-size: clamp(24px, 2vw, 36px);
+  font-size: clamp(22px, 2vw, 32px);
   margin: 0 0 8px 0;
   font-weight: 600;
   color: #f8fafc;
 }
 
 .dept {
-  font-size: clamp(15px, 1.2vw, 20px);
+  font-size: clamp(14px, 1.2vw, 18px);
   color: #94a3b8;
   text-transform: capitalize;
 }
@@ -174,7 +174,7 @@
 
 .ticket-number {
   font-family: 'Outfit', sans-serif;
-  font-size: clamp(80px, 8vw, 140px);
+  font-size: clamp(56px, 4.5vw, 96px);
   font-weight: 700;
   line-height: 1;
   color: #bae6fd;
@@ -205,11 +205,12 @@
 }
 
 .tv-card.empty {
-  opacity: 0.5;
-  filter: grayscale(0.5);
+  opacity: 0.6;
+  border-color: transparent;
+  background: #060B14;
 }
 .tv-card.empty .ticket-number {
-  color: #475569;
+  color: #334155;
 }
 
 /* Offline Banner */

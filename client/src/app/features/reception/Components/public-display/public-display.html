@@ -75,8 +75,8 @@
       @for (q of queues(); track q._id) {
         <div class="tv-card" [class.flash]="flashQueueId() === q._id" [class.empty]="!q.currentlyServing">
           <div class="tv-card-header">
-            <h2>{{ q.name.split('-')[0].trim() }}</h2>
-            <span class="dept">{{ q.name.split('-')[1].trim() }}</span>
+            <h2>{{ q.name.split('-')[0]?.trim() || q.name }}</h2>
+            <span class="dept">{{ q.name.split('-')[1]?.trim() || 'General' }}</span>
           </div>
           <div class="tv-card-body">
             <div class="ticket-number">
