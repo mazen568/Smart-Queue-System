@@ -104,6 +104,10 @@ export class Dashboard implements OnInit, OnDestroy {
     this.router.navigate(['/reception/queue', queue._id]);
   }
 
+  openPublicDisplay() {
+    window.open('/reception/display', '_blank');
+  }
+
   ngOnDestroy() {
     this.subs.unsubscribe();
   }

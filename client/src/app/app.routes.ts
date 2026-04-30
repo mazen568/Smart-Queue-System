@@ -125,6 +125,12 @@ export const routes: Routes = [
     ]
   },
   {
+    path: "reception/display",
+    loadComponent: () => import("./features/reception/Components/public-display/public-display").then(c => c.PublicDisplay),
+    canActivate: [authGuard, roleGuard],
+    data: { roles: ['reception'] }
+  },
+  {
     path: "unauthorized",
     loadComponent: () => import("./shared/Components/unauthorized/unauthorized").then(c => c.Unauthorized),
     title: "Unauthorized access"
