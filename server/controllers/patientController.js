@@ -45,7 +45,7 @@ export const getClinicDetails = async (req, res, next) => {
     }
 
     const queues = await Queue.find({ clinicId: clinic._id, isActive: true }).lean();
-    
+
     // Aggregate waiting counts in one go for efficiency
     const queueIds = queues.map((q) => q._id);
     const waits = await Ticket.aggregate([
@@ -82,12 +82,12 @@ export const takeTicket = async (req, res, next) => {
     // Integrity Check: Ensure queue exists and belongs to the clinic
     const queue = await Queue.findOne({ _id: queueId, clinicId, isActive: true });
     if (!queue) {
-      return res.status(400).json({ 
-        success: false, 
-        message: "The requested doctor is not available at this clinic." 
+      return res.status(400).json({
+        success: false,
+        message: "The requested doctor is not available at this clinic."
       });
     }
-    
+
     const ticketData = await ticketService.generateTicket({
       clinicId,
       queueId,
@@ -150,7 +150,7 @@ export const getMyTicketStatus = async (req, res, next) => {
 export const cancelTicket = async (req, res, next) => {
   try {
     const ticket = await ticketService.cancelTicket(req.params.id);
-    
+
     // Broadcast update to the clinic
     const waitingCount = await Ticket.countDocuments({ queueId: ticket.queueId, status: "waiting" });
     const io = getIO();

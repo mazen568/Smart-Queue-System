@@ -1,3 +1,5 @@
+import mongoose from "mongoose";
+import fs from "fs";
 import Clinic from "../models/clinicModel.js";
 import Queue from "../models/queueModel.js";
 import User from "../models/userModel.js";
@@ -113,7 +115,45 @@ export const createQueue = async (req, res, next) => {
 // @access  Private (Admin)
 export const getQueues = async (req, res, next) => {
   try {
-    const queues = await Queue.find({ clinicId: req.user.clinicId, isActive: { $ne: false } });
+    const clinicId = req.user.clinicId;
+    const queues = await Queue.aggregate([
+      {
+        $match: {
+          clinicId: new mongoose.Types.ObjectId(String(clinicId)),
+          isActive: { $ne: false },
+        },
+      },
+      {
+        $lookup: {
+          from: "tickets",
+          let: { queueId: "$_id" },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ["$queueId", "$$queueId"] },
+                    { $eq: ["$status", "waiting"] },
+                  ],
+                },
+              },
+            },
+          ],
+          as: "waitingTickets",
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+          name: 1,
+          currentNumber: 1,
+          avgServiceTime: 1,
+          isActive: 1,
+          totalServedCount: 1,
+          waitingCount: { $size: "$waitingTickets" },
+        },
+      },
+    ]);
 
     res.status(200).json({
       success: true,
@@ -185,7 +225,6 @@ export const resetQueue = async (req, res, next) => {
   }
 };
 
-// --- Phase 3: Staff Management ---
 
 // @desc    Create reception staff account
 // @route   POST /api/admin/staff
@@ -286,7 +325,6 @@ export const resetStaffPassword = async (req, res, next) => {
   }
 };
 
-// --- Phase 4: Overview Stats ---
 
 // @desc    Get admin overview stats
 // @route   GET /api/admin/overview
@@ -299,31 +337,148 @@ export const getOverviewStats = async (req, res, next) => {
     const todayStart = new Date();
     todayStart.setHours(0, 0, 0, 0);
 
-    const [queuesCount, staffCount, ticketsServedToday, currentlyWaiting] =
-      await Promise.all([
-        Queue.countDocuments({ clinicId, isActive: { $ne: false } }),
-        User.countDocuments({ clinicId, role: "reception" }),
-        Ticket.countDocuments({
-          clinicId,
-          status: "done",
-          createdAt: { $gte: todayStart },
-        }),
-        Ticket.countDocuments({
-          clinicId,
-          status: "waiting",
-        }),
-      ]);
+    const [
+      totalPatients,
+      activeQueuesCount,
+      ticketsServedToday,
+      liveQueues,
+      waitingPatients,
+      recentServed,
+    ] = await Promise.all([
+      // Total tickets ever for this clinic
+      Ticket.countDocuments({ clinicId }),
 
-    // TODO: Add Credits count when model is available
+      // Active queues count
+      Queue.countDocuments({ clinicId, isActive: { $ne: false } }),
+
+      // Tickets served today
+      Ticket.countDocuments({
+        clinicId,
+        status: "done",
+        createdAt: { $gte: todayStart },
+      }),
+
+      // Live queue breakdown: each queue with its waiting ticket count
+      Queue.aggregate([
+        {
+          $match: {
+            clinicId: new mongoose.Types.ObjectId(String(clinicId)),
+            isActive: { $ne: false },
+          },
+        },
+        {
+          $lookup: {
+            from: "tickets",
+            let: { queueId: "$_id" },
+            pipeline: [
+              {
+                $match: {
+                  $expr: {
+                    $and: [
+                      { $eq: ["$queueId", "$$queueId"] },
+                      { $eq: ["$status", "waiting"] },
+                    ],
+                  },
+                },
+              },
+            ],
+            as: "waitingTickets",
+          },
+        },
+        {
+          $project: {
+            _id: 1,
+            name: 1,
+            currentNumber: 1,
+            avgServiceTime: 1,
+            waitingCount: { $size: "$waitingTickets" },
+          },
+        },
+        { $sort: { waitingCount: -1 } },
+      ]),
+
+      // Recent Waiting Patients
+      Ticket.aggregate([
+        {
+          $match: {
+            clinicId: new mongoose.Types.ObjectId(String(clinicId)),
+            status: "waiting",
+          },
+        },
+        { $sort: { createdAt: 1 } }, // Oldest first (next in line)
+        { $limit: 10 },
+        {
+          $lookup: {
+            from: "queues",
+            localField: "queueId",
+            foreignField: "_id",
+            as: "queue",
+          },
+        },
+        { $unwind: "$queue" },
+        {
+          $project: {
+            _id: 1,
+            number: 1,
+            status: 1,
+            createdAt: 1,
+            queueName: "$queue.name",
+          },
+        },
+      ]),
+
+      // Recent Served Patients (Today)
+      Ticket.aggregate([
+        {
+          $match: {
+            clinicId: new mongoose.Types.ObjectId(String(clinicId)),
+            status: "done",
+            completedAt: { $gte: todayStart },
+          },
+        },
+        { $sort: { completedAt: -1 } }, // Most recent first
+        { $limit: 10 },
+        {
+          $lookup: {
+            from: "queues",
+            localField: "queueId",
+            foreignField: "_id",
+            as: "queue",
+          },
+        },
+        { $unwind: "$queue" },
+        {
+          $project: {
+            _id: 1,
+            number: 1,
+            status: 1,
+            completedAt: 1,
+            queueName: "$queue.name",
+          },
+        },
+      ]),
+    ]);
+
+    // Average wait time across all active queues (in minutes)
+    const avgWaitTime =
+      liveQueues.length > 0
+        ? Math.round(
+          liveQueues.reduce((sum, q) => sum + q.avgServiceTime, 0) /
+          liveQueues.length
+        )
+        : 0;
 
     res.status(200).json({
       success: true,
       data: {
-        queuesCount,
-        staffCount,
+        totalPatients,
+        activeQueues: activeQueuesCount,
+        avgWaitTime,
         ticketsServedToday,
-        currentlyWaiting,
-        creditBalance: 0,
+        creditBalance: 0, // placeholder until Member 5 (Billing) delivers Credits model
+        liveQueues,
+        waitingPatients,
+        recentServed,
       },
       message: "Overview stats fetched successfully",
     });
@@ -332,7 +487,6 @@ export const getOverviewStats = async (req, res, next) => {
   }
 };
 
-// --- Phase X: Ticket Operations (for real-time patient tracking) ---
 
 // @desc    Mark a ticket as called (Pick from waiting)
 // @route   POST /api/admin/tickets/:id/call
@@ -341,16 +495,16 @@ export const callTicket = async (req, res, next) => {
   try {
     // Atomic update: only call if it's currently waiting
     const ticket = await Ticket.findOneAndUpdate(
-      { 
-        _id: req.params.id, 
-        clinicId: req.user.clinicId, 
-        status: "waiting" 
+      {
+        _id: req.params.id,
+        clinicId: req.user.clinicId,
+        status: "waiting"
       },
-      { 
-        $set: { 
-          status: "called", 
-          calledAt: new Date() 
-        } 
+      {
+        $set: {
+          status: "called",
+          calledAt: new Date()
+        }
       },
       { new: true }
     );
@@ -379,16 +533,16 @@ export const completeTicket = async (req, res, next) => {
   try {
     // Atomic update: only complete if it's currently called
     const ticket = await Ticket.findOneAndUpdate(
-      { 
-        _id: req.params.id, 
-        clinicId: req.user.clinicId, 
-        status: "called" 
+      {
+        _id: req.params.id,
+        clinicId: req.user.clinicId,
+        status: "called"
       },
-      { 
-        $set: { 
-          status: "done", 
-          completedAt: new Date() 
-        } 
+      {
+        $set: {
+          status: "done",
+          completedAt: new Date()
+        }
       },
       { new: true }
     );
@@ -396,6 +550,11 @@ export const completeTicket = async (req, res, next) => {
     if (!ticket) {
       return next(new AppError("Ticket not found, unauthorized, or not in 'called' state", 404));
     }
+
+    // Increment totalServedCount for the queue
+    await Queue.findByIdAndUpdate(ticket.queueId, {
+      $inc: { totalServedCount: 1 }
+    });
 
     const io = getIO();
     io.to(`clinic:${ticket.clinicId}`).emit("ticketDone", {
@@ -405,6 +564,45 @@ export const completeTicket = async (req, res, next) => {
     });
 
     res.status(200).json({ success: true, data: ticket });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Upload clinic logo
+// @route   POST /api/admin/clinic/logo
+// @access  Private (Admin)
+export const uploadLogo = async (req, res, next) => {
+  try {
+    if (!req.file) {
+      return next(new AppError("Please upload a file", 400));
+    }
+
+    const clinicId = req.user.clinicId;
+    const clinic = await Clinic.findById(clinicId);
+
+    if (!clinic) {
+      return next(new AppError("Clinic not found", 404));
+    }
+
+    // Delete old logo if it exists and is a local file
+    if (clinic.logoUrl && clinic.logoUrl.startsWith("/uploads/")) {
+      const oldPath = clinic.logoUrl.split("/").pop();
+      const fullPath = `./uploads/${oldPath}`;
+      if (fs.existsSync(fullPath)) {
+        fs.unlinkSync(fullPath);
+      }
+    }
+
+    const logoUrl = `/uploads/${req.file.filename}`;
+    clinic.logoUrl = logoUrl;
+    await clinic.save();
+
+    res.status(200).json({
+      success: true,
+      data: { logoUrl },
+      message: "Logo uploaded successfully",
+    });
   } catch (error) {
     next(error);
   }

@@ -47,11 +47,12 @@ export const getTicketStatus = async (ticketId) => {
   }
 
   const position = await calculatePosition(ticket.queueId._id, ticket.createdAt);
+  const isSomeoneCalled = await Ticket.exists({ queueId: ticket.queueId._id, status: "called" });
 
   return {
     ticket,
     position,
-    estimatedWaitTime: position * ticket.queueId.avgServiceTime,
+    estimatedWaitTime: (position + (isSomeoneCalled ? 1 : 0)) * ticket.queueId.avgServiceTime,
   };
 };
 
@@ -81,7 +82,7 @@ const calculatePosition = async (queueId, createdAt) => {
 export const cancelTicket = async (ticketId) => {
   const ticket = await Ticket.findById(ticketId);
   if (!ticket) throw new AppError("Ticket not found.", 404);
-  
+
   if (ticket.status === 'done') {
     throw new AppError("Cannot cancel a completed ticket.", 400);
   }

@@ -15,14 +15,13 @@ function isAuthEndpoint(url: string) {
   return (
     url.includes('/auth/login') ||
     url.includes('/auth/register') ||
-    url.includes('/auth/refresh') ||
-    url.includes('/auth/logout')
+    url.includes('/auth/refresh')
   );
 }
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const injector = inject(Injector);
-  
+
   const apiRequest = isApiUrl(req.url);
   const protectedRequest = apiRequest && !isAuthEndpoint(req.url);
 

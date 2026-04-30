@@ -8,6 +8,8 @@ import { Clinic, Queue } from '../../../../types/queue';
 import { Subscription } from 'rxjs';
 import { ModalComponent } from '../../../../shared/Components/modal/modal';
 import { SpinnerComponent } from '../../../../shared/Components/spinner/spinner';
+import { environment } from '../../../../../environments/environment';
+import { getClinicLogoUrl } from '../../../../shared/utils/url-utils';
 
 @Component({
   selector: 'app-clinic-detail',
@@ -130,4 +132,16 @@ export class ClinicDetailComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     if (this.socketSub) this.socketSub.unsubscribe();
   }
+
+  getLogoUrl(url: string | null | undefined): string | null {
+    return getClinicLogoUrl(url, environment.apiUrl, environment.production) || 'assets/default-clinic.jpg';
+  }
+
+  onImageError(event: Event) {
+  const img = event.target as HTMLImageElement;
+  img.src = 'assets/default-clinic.jpg';
+  img.onerror = null;
 }
+}
+
+

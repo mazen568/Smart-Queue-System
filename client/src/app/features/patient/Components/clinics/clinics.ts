@@ -7,6 +7,8 @@ import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 import { FormsModule } from '@angular/forms';
 import { SpinnerComponent } from '../../../../shared/Components/spinner/spinner';
+import { environment } from '../../../../../environments/environment';
+import { getClinicLogoUrl } from '../../../../shared/utils/url-utils';
 
 @Component({
   selector: 'app-clinics',
@@ -50,5 +52,9 @@ export class ClinicsComponent implements OnInit {
 
   onSearchChange(value: string): void {
     this.search$.next(value);
+  }
+
+  getLogoUrl(url: string | null | undefined): string | null {
+    return getClinicLogoUrl(url, environment.apiUrl, environment.production);
   }
 }

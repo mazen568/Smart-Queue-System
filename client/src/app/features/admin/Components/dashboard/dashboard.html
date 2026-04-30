@@ -1,1 +1,141 @@
-<p>dashboard works!</p>
+<div class="dashboard-page fade-in-up">
+
+  <app-admin-header [title]="'Good morning, ' + (user?.name || 'Admin')"
+    caption="Here is how the clinic is performing right now.">
+  </app-admin-header>
+
+
+  <!-- Stats Section -->
+  @if (stats()) {
+  <div class="top-stats">
+    <div class="stat-item">
+      <span class="stat-label">TOTAL PATIENTS</span>
+      <div class="stat-value">{{ stats()!.totalPatients | number }}</div>
+      <span class="stat-sub">All time</span>
+    </div>
+
+    <div class="stat-item">
+      <span class="stat-label">ACTIVE QUEUES</span>
+      <div class="stat-value">{{ stats()!.activeQueues | number }}</div>
+      <span class="stat-sub">Today</span>
+    </div>
+
+    <div class="stat-item">
+      <span class="stat-label">AVG. WAIT TIME</span>
+      <div class="stat-value">
+        {{ stats()!.avgWaitTime }}<span class="unit">m</span>
+      </div>
+      <span class="stat-sub">Today</span>
+    </div>
+  </div>
+
+  <!-- Bottom Section -->
+  <div class="bottom-section">
+    <!-- Live Queue Panel -->
+    <div class="panel">
+      <div class="panel-header">
+        <div>
+          <h3 class="h3">Queues</h3>
+          <p class="caption">Queues load and throughput</p>
+        </div>
+      </div>
+
+      @if (stats()!.liveQueues.length === 0) {
+      <div class="empty-state" style="text-align: center; padding: var(--space-8);">
+        <p class="caption">No active queues yet.</p>
+      </div>
+      }
+
+      @for (queue of stats()!.liveQueues; track queue._id) {
+      <div class="queue-row">
+        <div class="queue-icon">
+          <span class="material-symbols-outlined">stethoscope</span>
+        </div>
+        <div class="queue-info">
+          <div class="queue-name">{{ queue.name }}</div>
+          <div class="caption">{{ queue.waitingCount }} waiting</div>
+          <div class="queue-bar-track">
+            <div class="queue-bar" [style.width.%]="getBarWidth(queue.waitingCount)"
+              [class]="getBarClass(queue.waitingCount)">
+            </div>
+          </div>
+        </div>
+        <div class="queue-serving">
+          <div class="caption">Serving</div>
+          <div class="now-serving-badge">P-{{ queue.currentNumber }}</div>
+        </div>
+      </div>
+      }
+    </div>
+
+    <!-- Activity Panel -->
+    <div class="panel">
+      <div class="panel-header">
+        <div>
+          <h3 class="h3">Recent Activity</h3>
+          <p class="caption">Patient status tracking</p>
+        </div>
+      </div>
+
+      <div class="activity-grid">
+        <!-- Waiting Column -->
+        <div class="activity-col">
+          <div class="col-header">
+            <span class="dot waiting"></span>
+            WAITING
+          </div>
+
+          <div class="activity-list">
+            @for (patient of stats()?.waitingPatients; track patient._id) {
+            <div class="activity-item">
+              <div class="patient-id">P-{{ patient.number }}</div>
+              <div class="activity-details">
+                <div class="queue-tag">{{ patient.queueName }}</div>
+                <div class="time-stamp">{{ patient.createdAt | date:'shortTime' }}</div>
+              </div>
+            </div>
+            } @empty {
+            <p class="empty-msg">No patients waiting</p>
+            }
+          </div>
+        </div>
+
+        <!-- Served Column -->
+        <div class="activity-col">
+          <div class="col-header">
+            <span class="dot served"></span>
+            SERVED
+          </div>
+
+          <div class="activity-list">
+            @for (patient of stats()?.recentServed; track patient._id) {
+            <div class="activity-item">
+              <div class="patient-id served">P-{{ patient.number }}</div>
+              <div class="activity-details">
+                <div class="queue-tag">{{ patient.queueName }}</div>
+                <div class="time-stamp">{{ patient.completedAt | date:'shortTime' }}</div>
+              </div>
+            </div>
+            } @empty {
+            <p class="empty-msg">None served today</p>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  }
+
+  <!-- Loading State -->
+  @if (loading()) {
+  <div class="top-stats">
+    <div class="stat-item surface shimmer" style="height: 140px; border: none;"></div>
+    <div class="stat-item surface shimmer" style="height: 140px; border: none;"></div>
+    <div class="stat-item surface shimmer" style="height: 140px; border: none;"></div>
+  </div>
+  <div class="bottom-section">
+    <div class="panel surface shimmer" style="height: 400px; border: none;"></div>
+  </div>
+  }
+
+</div>
