@@ -8,10 +8,14 @@ import { ToastService } from '../../../../shared/services/toast.service';
 import { QueueTicketsResponse, QueueStatsResponse } from '../../../../types/queue';
 import { Subscription } from 'rxjs';
 
+import { ActiveDisplay } from './components/active-display/active-display';
+import { WaitingList } from './components/waiting-list/waiting-list';
+import { ActionBar } from './components/action-bar/action-bar';
+
 @Component({
   selector: 'app-queue-control',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, ActiveDisplay, WaitingList, ActionBar],
   templateUrl: './queue-control.html',
   styleUrl: './queue-control.css',
 })
@@ -37,6 +41,58 @@ export class QueueControl implements OnInit, OnDestroy {
   }
 
   private subs = new Subscription();
+  private audioContext: AudioContext | null = null;
+
+  private playAudio(type: 'success' | 'new') {
+    try {
+      if (!this.audioContext) {
+        this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      }
+      
+      const oscillator = this.audioContext.createOscillator();
+      const gainNode = this.audioContext.createGain();
+      
+      oscillator.connect(gainNode);
+      gainNode.connect(this.audioContext.destination);
+      
+      if (type === 'success') {
+        // Classic, high-pitched "Ding Dong" announcement chime
+        oscillator.type = 'sine';
+        const now = this.audioContext.currentTime;
+        
+        // Ding: E6 (1318.51 Hz)
+        oscillator.frequency.setValueAtTime(1318.51, now);
+        // Dong: C6 (1046.50 Hz)
+        oscillator.frequency.setValueAtTime(1046.50, now + 0.5);
+
+        // Volume envelope for long ringing
+        gainNode.gain.setValueAtTime(0, now);
+        // Ding Attack
+        gainNode.gain.linearRampToValueAtTime(0.6, now + 0.05);
+        // Ding Decay
+        gainNode.gain.exponentialRampToValueAtTime(0.2, now + 0.5);
+        // Dong Attack
+        gainNode.gain.linearRampToValueAtTime(0.6, now + 0.55);
+        // Dong Long Release
+        gainNode.gain.exponentialRampToValueAtTime(0.001, now + 2.5);
+
+        oscillator.start(now);
+        oscillator.stop(now + 2.5);
+      } else if (type === 'new') {
+        // Higher pitched, longer single bell ring
+        oscillator.type = 'triangle';
+        const now = this.audioContext.currentTime;
+        oscillator.frequency.setValueAtTime(880, now); // A5
+        gainNode.gain.setValueAtTime(0, now);
+        gainNode.gain.linearRampToValueAtTime(0.3, now + 0.05);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, now + 1.5);
+        oscillator.start(now);
+        oscillator.stop(now + 1.5);
+      }
+    } catch (e) {
+      console.warn('Audio playback failed', e);
+    }
+  }
 
   ngOnInit() {
     const id = this.route.snapshot.paramMap.get('id');
@@ -93,6 +149,7 @@ export class QueueControl implements OnInit, OnDestroy {
       this.subs.add(
         this.socketService.onEvent('ticketCreated').subscribe((data: any) => {
           if (data.queueId === this.queueId()) {
+            this.playAudio('new');
             this.fetchTickets();
           }
         })
@@ -118,15 +175,33 @@ export class QueueControl implements OnInit, OnDestroy {
   // --- ACTIONS ---
 
   callNext() {
-    if (this.isProcessing()) return;
+    if (this.isProcessing() || !this.ticketsData()?.nextTicket) return;
     this.isProcessing.set(true);
+
+    // Optimistic Update
+    const previousState = this.ticketsData();
+    if (previousState && previousState.tickets.length > 0) {
+      const newTickets = [...previousState.tickets];
+      const nextPerson = newTickets.shift();
+      
+      this.ticketsData.set({
+        ...previousState,
+        calledTicket: nextPerson as any,
+        nextTicket: newTickets[0] || null,
+        tickets: newTickets,
+        waitingCount: previousState.waitingCount - 1
+      });
+      this.playAudio('success');
+    }
+
     this.receptionService.callNext(this.queueId()).subscribe({
       next: (ticket) => {
         this.toastService.success(`Called ${ticket.number}`);
-        this.fetchTickets();
+        this.fetchTickets(); // Sync with server truth
         this.isProcessing.set(false);
       },
       error: (err) => {
+        if (previousState) this.ticketsData.set(previousState); // Rollback
         this.toastService.error(err.message);
         this.isProcessing.set(false);
       }

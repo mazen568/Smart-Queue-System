@@ -6,7 +6,7 @@ import { Clinic, Queue, QueueStatsResponse } from '../../../../types/queue';
 import { SocketService } from '../../../../core/services/socket.service';
 import { AuthService } from '../../../auth/services/auth-service';
 import { PatientService } from '../../../patient/services/patient.service';
-import { Subscription } from 'rxjs';
+import { Subscription, forkJoin, switchMap, map, of, catchError } from 'rxjs';
 
 interface QueueView extends Queue {
   currentlyServing?: number | null;
@@ -64,22 +64,34 @@ export class Dashboard implements OnInit, OnDestroy {
   }
 
   loadQueues() {
-    this.receptionService.getQueues().subscribe({
-      next: (data) => {
-        // Initialize with basic data
+    this.receptionService.getQueues().pipe(
+      switchMap(data => {
+        if (!data || data.length === 0) {
+          return of([]);
+        }
+        
+        // Initialize with basic data before stats load
         this.queues.set(data);
+        
+        // Fetch detailed stats for all queues concurrently
+        const statsReqs = data.map(queue => 
+          this.receptionService.getQueueStats(queue._id).pipe(
+            map(stats => ({
+              ...queue,
+              currentlyServing: stats.currentlyServing,
+              estimatedWaitTime: stats.estimatedWaitTime
+            })),
+            catchError(() => of(queue))
+          )
+        );
+        return forkJoin(statsReqs);
+      })
+    ).subscribe({
+      next: (detailedQueues) => {
+        if (detailedQueues.length > 0) {
+          this.queues.set(detailedQueues);
+        }
         this.isLoading.set(false);
-
-        // Fetch detailed stats for each queue to get 'currentlyServing'
-        data.forEach(queue => {
-          this.receptionService.getQueueStats(queue._id).subscribe(stats => {
-            this.queues.update(qs => qs.map(q => 
-              q._id === queue._id 
-                ? { ...q, currentlyServing: stats.currentlyServing, estimatedWaitTime: stats.estimatedWaitTime } 
-                : q
-            ));
-          });
-        });
       },
       error: (err) => {
         console.error(err);

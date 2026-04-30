@@ -5,125 +5,66 @@
       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
       All queues
     </a>
-    <div class="queue-meta" *ngIf="stats()">
-      <span class="live-dot pulse-soft"></span> Live &middot; synced &nbsp;&nbsp;&nbsp;
-      <span class="muted">{{ doctorName }} &middot; {{ department }}</span>
+    <div class="queue-meta">
+      @if (stats()) {
+        <span class="live-dot pulse-soft"></span> Live &middot; synced &nbsp;&nbsp;&nbsp;
+        <span class="muted">{{ doctorName }} &middot; {{ department }}</span>
+      }
     </div>
   </div>
 
-  <div class="loading-state" *ngIf="isLoading()">
-    <div class="shimmer-block surface shimmer" style="height: 600px;"></div>
-    <div class="shimmer-block surface shimmer" style="height: 600px;"></div>
-  </div>
+  @if (isLoading()) {
+    <div class="layout-grid skeleton-layout fade-in">
+      <div class="skeleton-active surface">
+        <div class="skeleton-header">
+          <div class="shimmer-line short"></div>
+          <div class="shimmer-pill"></div>
+        </div>
+        <div class="skeleton-center">
+          <div class="shimmer-giant"></div>
+          <div class="shimmer-line medium"></div>
+        </div>
+      </div>
+      <div class="skeleton-list surface">
+        <div class="skeleton-header">
+          <div class="shimmer-line medium"></div>
+        </div>
+        <div class="skeleton-rows">
+          <div class="shimmer-row"></div>
+          <div class="shimmer-row"></div>
+          <div class="shimmer-row"></div>
+          <div class="shimmer-row"></div>
+        </div>
+      </div>
+    </div>
+  }
 
   <!-- Main Layout -->
-  <div class="layout-grid" *ngIf="!isLoading() && ticketsData()">
-    
-    <!-- LEFT: ACTIVE DISPLAY -->
-    <div class="active-display surface-elevated">
-      <div class="display-header">
-        <span class="caption display-title">NOW SERVING</span>
-        <div class="status-pill" *ngIf="ticketsData()?.calledTicket">
-          <span class="dot blue"></span> In room
-        </div>
-      </div>
+  @if (!isLoading() && ticketsData()) {
+    <div class="layout-grid fade-in-up">
+      <!-- LEFT: ACTIVE DISPLAY -->
+      <app-active-display
+        [calledTicket]="ticketsData()?.calledTicket"
+        [stats]="stats()">
+      </app-active-display>
 
-      <div class="display-center" [class.empty]="!ticketsData()?.calledTicket">
-        <h1 class="giant-number">
-          <ng-container *ngIf="ticketsData()?.calledTicket; else noTicket">
-            A-{{ ticketsData()?.calledTicket?.number?.toString()?.padStart(3, '0') }}
-          </ng-container>
-          <ng-template #noTicket>--</ng-template>
-        </h1>
-        <div class="patient-name">
-          {{ ticketsData()?.calledTicket?.customerName || 'Waiting for next patient...' }}
-        </div>
-      </div>
-
-      <div class="display-footer">
-        <div class="stats-row">
-          <div class="stat-item">
-            <span class="caption">QUEUE</span>
-            <strong>{{ stats()?.waitingCount || 0 }}</strong>
-          </div>
-          <div class="stat-item">
-            <span class="caption">SERVED</span>
-            <strong>{{ stats()?.servedToday || 0 }}</strong>
-          </div>
-          <div class="stat-item">
-            <span class="caption">AVG. WAIT</span>
-            <strong>{{ stats()?.avgServiceTime || 0 | number:'1.0-0' }} min</strong>
-          </div>
-        </div>
-
-        <div class="shortcuts-hint">
-          <span><kbd>N</kbd> Next</span> &middot;
-          <span><kbd>S</kbd> Skip</span> &middot;
-          <span><kbd>R</kbd> Recall</span> &middot;
-          <span><kbd>D</kbd> Done</span>
-        </div>
-      </div>
+      <!-- RIGHT: WAITING LIST -->
+      <app-waiting-list
+        [data]="ticketsData()"
+        (callSpecific)="callSpecific($event)">
+      </app-waiting-list>
     </div>
 
-    <!-- RIGHT: WAITING LIST -->
-    <div class="waiting-list surface">
-      <div class="list-header">
-        <span class="caption">WAITING &middot; {{ ticketsData()?.waitingCount || 0 }}</span>
-        <span class="caption muted">Auto-sorted</span>
-      </div>
-
-      <div class="list-body">
-        <div class="empty-list" *ngIf="ticketsData()?.tickets?.length === 0">
-          <p class="muted">No patients waiting in queue.</p>
-        </div>
-
-        <div class="ticket-row" *ngFor="let t of ticketsData()?.tickets; let i = index">
-          <div class="ticket-left">
-            <div class="position-circle">{{ i + 1 }}</div>
-            <div class="ticket-details">
-              <strong>A-{{ t.number.toString().padStart(3, '0') }}</strong>
-              <span class="caption muted">{{ t.customerName || 'Walk-in Patient' }}</span>
-            </div>
-          </div>
-          <div class="ticket-right">
-            <!-- First in line indicator -->
-            <span class="up-next" *ngIf="i === 0">UP NEXT</span>
-            <!-- Action to call this specific person -->
-            <button class="btn btn-ghost hover-show" (click)="callSpecific(t._id)">Call specifically</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-  </div>
-
-  <!-- FLOATING ACTION BAR -->
-  <div class="action-bar surface-elevated" *ngIf="!isLoading()">
-    <button class="btn btn-primary action-btn" (click)="callNext()" [disabled]="isProcessing() || ticketsData()?.waitingCount === 0">
-      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
-      Call next
-      <span class="shortcut-key">N</span>
-    </button>
-
-    <div class="divider"></div>
-
-    <button class="btn btn-ghost action-btn" (click)="skip()" [disabled]="isProcessing() || !ticketsData()?.nextTicket">
-      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19"/></svg>
-      Skip
-      <span class="shortcut-key outline">S</span>
-    </button>
-
-    <button class="btn btn-ghost action-btn" (click)="recall()" [disabled]="isProcessing() || !ticketsData()?.calledTicket">
-      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
-      Recall
-      <span class="shortcut-key outline">R</span>
-    </button>
-
-    <button class="btn btn-ghost action-btn" (click)="markDone()" [disabled]="isProcessing() || !ticketsData()?.calledTicket">
-      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-      Mark done
-      <span class="shortcut-key outline">D</span>
-    </button>
-  </div>
-
+    <!-- FLOATING ACTION BAR -->
+    <app-action-bar
+      [isProcessing]="isProcessing()"
+      [waitingCount]="ticketsData()?.waitingCount || 0"
+      [hasNextTicket]="!!ticketsData()?.nextTicket"
+      [hasCalledTicket]="!!ticketsData()?.calledTicket"
+      (callNext)="callNext()"
+      (skip)="skip()"
+      (recall)="recall()"
+      (markDone)="markDone()">
+    </app-action-bar>
+  }
 </div>

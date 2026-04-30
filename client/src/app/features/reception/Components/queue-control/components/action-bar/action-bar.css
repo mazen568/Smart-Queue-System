@@ -1,0 +1,77 @@
+.action-bar {
+  position: fixed;
+  bottom: var(--space-8);
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2);
+  border-radius: var(--radius-full);
+  z-index: 100;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.1), inset 0 1px 1px rgba(255,255,255,0.4);
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  animation: slide-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.divider {
+  width: 1px;
+  height: 24px;
+  background: var(--border);
+  margin: 0 var(--space-2);
+}
+
+.action-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  border-radius: var(--radius-full);
+  padding: var(--space-3) var(--space-6);
+  font-size: 15px;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.2s ease;
+}
+
+.action-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.action-btn:not(:disabled):active {
+  transform: scale(0.96);
+}
+
+.primary-action {
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+.primary-action:not(:disabled):hover {
+  box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
+}
+
+.shortcut-key {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.2);
+  font-size: 11px;
+  font-weight: 600;
+  margin-left: var(--space-2);
+}
+
+.shortcut-key.outline {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--muted-foreground);
+}
+
+@keyframes slide-up {
+  0% { transform: translate(-50%, 100%); opacity: 0; }
+  100% { transform: translate(-50%, 0); opacity: 1; }
+}
