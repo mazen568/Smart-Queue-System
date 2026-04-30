@@ -13,9 +13,9 @@
 
   <div class="clinic-hero" *ngIf="!loading && clinic">
     <div class="clinic-brand">
-      <img [src]="clinic.logoUrl || 'assets/default-clinic.jpg'" 
-           (error)="$any($event.target).src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZTEzNDM0Ij48L3JlY3Q+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSIgZm9udC1zaXplPSIyMCIgZm9udC1mYW1pbHk9IkFyaWFsIj5Mb2dvPC90ZXh0Pjwvc3ZnPg=='; $any($event.target).onerror = null"
-           alt="Logo" class="logo" />
+      <img [src]="getLogoUrl(clinic.logoUrl)"
+        (error)="$any($event.target).src = 'assets/default-clinic.jpg'; $any($event.target).onerror = null" alt="Logo"
+        class="logo" />
       <div class="clinic-titles">
         <h1>{{ clinic.name }}</h1>
         <p class="clinic-address">
@@ -78,14 +78,9 @@
   </div>
 </div>
 
-<app-modal 
-  *ngIf="dialogOpen" 
-  title="Confirm Ticket" 
-  primaryActionLabel="Confirm"
-  [isPrimaryLoading]="booking"
-  (close)="closeDialog()"
-  (primaryAction)="confirmTakeTicket()">
-  
+<app-modal *ngIf="dialogOpen" title="Confirm Ticket" primaryActionLabel="Confirm" [isPrimaryLoading]="booking"
+  (close)="closeDialog()" (primaryAction)="confirmTakeTicket()">
+
   <div class="booking-container">
     <div class="row">
       <div class="label">Clinic</div>
@@ -95,17 +90,11 @@
       <div class="label">Queue</div>
       <div class="value">{{ selectedQueue?.name }}</div>
     </div>
-    
+
     <div class="field">
       <label class="field-label" for="customerName">Your Name (optional)</label>
-      <input 
-        id="customerName"
-        class="text-input" 
-        [(ngModel)]="customerName" 
-        placeholder="Guest" 
-        [disabled]="booking" 
-        autocomplete="off"
-      />
+      <input id="customerName" class="text-input" [(ngModel)]="customerName" placeholder="Guest" [disabled]="booking"
+        autocomplete="off" />
     </div>
 
     <div class="hint">
@@ -115,4 +104,3 @@
 </app-modal>
 
 <app-spinner *ngIf="booking" message="Issuing your ticket..."></app-spinner>
-

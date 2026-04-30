@@ -29,7 +29,7 @@
     <div class="clinic-card" *ngFor="let clinic of clinics" [routerLink]="['/patient/clinic', clinic._id]">
       <div
         class="clinic-image"
-        [style.backgroundImage]="'url(' + (clinic.logoUrl || 'assets/default-clinic.jpg') + ')'"
+        [style.backgroundImage]="'url(' + getLogoUrl(clinic.logoUrl) + ')'"
       ></div>
       <div class="clinic-info">
         <h3>{{ clinic.name }}</h3>

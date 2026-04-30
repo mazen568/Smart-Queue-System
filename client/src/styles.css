@@ -298,3 +298,18 @@
     background-size: 200% 100%;
     animation: shimmer 2.5s infinite;
   }
+
+  /* ---------- VALIDATION ---------- */
+  .input.error {
+    border-color: var(--danger) !important;
+    background: rgba(229, 72, 77, 0.02) !important;
+  }
+
+  .field-error {
+    color: var(--danger);
+    font-size: var(--caption-size);
+    font-weight: 500;
+    margin-top: 4px;
+    display: block;
+    animation: fade-in-up 0.3s var(--ease-out-soft);
+  }

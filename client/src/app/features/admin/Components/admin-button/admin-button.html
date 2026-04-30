@@ -1,0 +1,5 @@
+<button class="btn btn-dark" [disabled]="loading" (click)="onClick.emit($event)">
+  <span class="spinner" *ngIf="loading"></span>
+  <span class="material-symbols-outlined" *ngIf="icon && !loading">{{ icon }}</span>
+  <span class="label-text">{{ loading ? 'Saving...' : label }}</span>
+</button>

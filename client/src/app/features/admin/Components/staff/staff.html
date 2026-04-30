@@ -1,0 +1,137 @@
+<div class="staff-page fade-in-up">
+
+  <app-admin-header title="Your front desk." caption="Add, remove and manage reception users with role-based access.">
+    <app-admin-button label="Invite user" icon="person_add" (onClick)="toggleInviteModal()">
+    </app-admin-button>
+  </app-admin-header>
+
+
+  @if (loading() && staff().length === 0) {
+  <div class="staff-list-container surface shadow-soft">
+    <div class="skeleton-row shimmer" *ngFor="let i of [1,2,3,4,5]"></div>
+  </div>
+  } @else {
+  <div class="staff-list-container surface shadow-soft">
+    <table class="staff-table">
+      <thead>
+        <tr>
+          <th>MEMBER</th>
+          <th>ROLE</th>
+          <th>STATUS</th>
+          <th class="col-actions">ACTIONS</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (member of staff(); track (member._id || member.id)) {
+        <tr>
+          <td>
+            <div class="member-info">
+              <div class="avatar">{{ getInitials(member.name) }}</div>
+              <div class="details">
+                <div class="name">{{ member.name }}</div>
+                <div class="email text-muted">{{ member.email }}</div>
+              </div>
+            </div>
+          </td>
+          <td>
+            <span class="role-badge">
+              <span class="material-symbols-outlined icon">verified_user</span>
+              {{ member.role | titlecase }}
+            </span>
+          </td>
+          <td>
+            <span class="status-badge active">
+              <span class="dot"></span>
+              Active
+            </span>
+          </td>
+          <td class="col-actions">
+            <div class="actions">
+              <button class="icon-btn" (click)="openResetModal(member)" title="Reset Password">
+                <span class="material-symbols-outlined">lock_reset</span>
+              </button>
+              <button class="icon-btn danger" (click)="deleteStaff(member)" title="Remove Access">
+                <span class="material-symbols-outlined">delete</span>
+              </button>
+            </div>
+          </td>
+        </tr>
+        } @empty {
+        <tr>
+          <td colspan="4" class="empty-row">
+            <div class="empty-state">
+              <span class="material-symbols-outlined">group_off</span>
+              <p>No staff members found.</p>
+            </div>
+          </td>
+        </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+  }
+
+  <!-- Invite Modal -->
+  @if (showInviteModal()) {
+  <app-modal title="Invite Staff Member" primaryActionLabel="Create Account" [isPrimaryLoading]="saving()"
+    (close)="toggleInviteModal()" (primaryAction)="inviteStaff()">
+
+    <div class="modal-form">
+      <div class="form-group">
+        <label class="label">Full Name</label>
+        <input type="text" class="input" [class.error]="fieldErrors().name" placeholder="e.g. Sarah Lee" [(ngModel)]="formData.name">
+        <span class="field-error" *ngIf="fieldErrors().name">{{ fieldErrors().name }}</span>
+      </div>
+
+      <div class="form-group">
+        <label class="label">Email Address</label>
+        <input type="email" class="input" [class.error]="fieldErrors().email" placeholder="e.g. sarah@pulse.clinic" [(ngModel)]="formData.email">
+        <span class="field-error" *ngIf="fieldErrors().email">{{ fieldErrors().email }}</span>
+      </div>
+
+      <div class="form-group">
+        <label class="label">Initial Password</label>
+        <div class="input-with-button">
+          <input type="text" class="input" [class.error]="fieldErrors().password" [(ngModel)]="formData.password">
+          <button class="btn-sm" (click)="generatePassword()">Generate</button>
+        </div>
+        <span class="field-error" *ngIf="fieldErrors().password">{{ fieldErrors().password }}</span>
+      </div>
+
+      <div class="warning-box">
+        <p class="caption">The user will login with this email and password.</p>
+      </div>
+    </div>
+  </app-modal>
+  }
+
+  <!-- Reset Password Modal -->
+  @if (showResetModal()) {
+  <app-modal title="Reset Staff Password" primaryActionLabel="Update Password" [isPrimaryLoading]="saving()" 
+    (close)="showResetModal.set(false)" (primaryAction)="confirmResetPassword()">
+    <div class="modal-form">
+      <p>Set a new password for <strong>{{ selectedUser()?.name }}</strong>.</p>
+      
+      <div class="form-group">
+        <label class="label">New Password</label>
+        <div class="input-with-button">
+          <input type="text" class="input" [(ngModel)]="resetPasswordData.password">
+          <button class="btn-sm" (click)="generatePassword()">Generate</button>
+        </div>
+      </div>
+
+      <p class="caption danger-text">Please ensure the staff member is notified of their new credentials.</p>
+    </div>
+  </app-modal>
+  }
+
+
+  <!-- Delete Confirmation Modal -->
+  @if (showDeleteConfirm()) {
+  <app-modal title="Remove Staff Access" primaryActionLabel="Remove Access" [isPrimaryLoading]="saving()" 
+    (close)="showDeleteConfirm.set(false)" (primaryAction)="confirmDelete()">
+    <p>Are you sure you want to remove <strong>{{ selectedUser()?.name }}</strong> from the clinic staff?</p>
+    <p class="caption danger-text" style="margin-top: var(--space-2);">This user will lose all access immediately.</p>
+  </app-modal>
+  }
+</div>

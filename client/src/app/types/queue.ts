@@ -15,6 +15,7 @@ export interface Queue {
   avgServiceTime: number;
   isActive: boolean;
   waitingCount?: number;
+  totalServedCount?: number;
 }
 
 export interface Ticket {

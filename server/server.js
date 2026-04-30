@@ -1,6 +1,8 @@
 import express from "express"
 import mongoose from "mongoose"
 import dotenv from "dotenv"
+import path from "path"
+import { fileURLToPath } from "url"
 import { createServer } from "http"
 import { errorHandler } from "./middlewares/errorHandling.js"
 import authRouter from "./routes/authRoutes.js"
@@ -30,7 +32,7 @@ app.use(express.json())
 app.use(cookieParser())
 
 app.use(cors({
-    origin: process.env.CLIENT_URL,
+    origin: "http://localhost:4200",
     credentials: true
 }))
 
@@ -46,6 +48,11 @@ app.use(`${baseURL}`, publicRouter)
 //protected routes
 app.use(`${baseURL}/admin`, adminRouter)
 app.use(`${baseURL}/reception`, receptionRouter)
+
+// Serve uploads statically
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 
 

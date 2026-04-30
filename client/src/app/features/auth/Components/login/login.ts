@@ -37,7 +37,7 @@ export class Login {
     this.serverError.set(null);
 
     this.auth.login(this.form.getRawValue()).subscribe({
-      next: (res:UserDTO) => {
+      next: (res: UserDTO) => {
         const redirect = this.returnUrl() || this.defaultDashboardForRole(res.user.role);
         this.router.navigateByUrl(redirect, { replaceUrl: true });
       },

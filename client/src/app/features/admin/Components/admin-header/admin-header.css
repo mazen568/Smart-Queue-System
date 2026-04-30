@@ -1,0 +1,64 @@
+.admin-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-8);
+}
+
+.subtitle {
+  font-size: var(--caption-size);
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  color: var(--accent);
+  margin-bottom: var(--space-2);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-transform: uppercase;
+}
+
+.subtitle::before {
+  content: "";
+  display: inline-block;
+  width: 4px;
+  height: 4px;
+  background: var(--accent);
+  border-radius: 50%;
+}
+
+.h1 {
+  font-size: var(--h1-size);
+  font-weight: 600;
+  margin: 0;
+  color: var(--foreground);
+  letter-spacing: -0.02em;
+}
+
+.caption {
+  margin-top: var(--space-2);
+  font-size: var(--body-size);
+  color: var(--muted-foreground);
+}
+
+.header-actions {
+  display: flex;
+  gap: var(--space-4);
+}
+
+@media (max-width: 768px) {
+  .admin-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-4);
+    margin-bottom: var(--space-6);
+  }
+  .header-actions {
+    width: 100%;
+  }
+  .header-actions ::ng-deep app-admin-button {
+    width: 100%;
+  }
+  .header-actions ::ng-deep app-admin-button button {
+    width: 100%;
+  }
+}

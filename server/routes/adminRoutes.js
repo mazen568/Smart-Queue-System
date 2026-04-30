@@ -14,10 +14,12 @@ import {
   getOverviewStats,
   callTicket,
   completeTicket,
+  uploadLogo,
 } from "../controllers/adminController.js";
 import authenticate from "../middlewares/authenticationMiddleware.js";
 import authorize from "../middlewares/authorizationMiddleware.js";
 import { isolateClinic } from "../middlewares/isolateClinicMiddleware.js";
+import { upload } from "../middlewares/multerMiddleware.js";
 import Queue from "../models/queueModel.js";
 import User from "../models/userModel.js";
 import express from "express";
@@ -31,6 +33,7 @@ router.use(authorize("admin"));
 // Clinic Management
 router.get("/clinic", getClinicDetails);
 router.put("/clinic", updateClinicDetails);
+router.post("/clinic/logo", upload.single("logo"), uploadLogo);
 router.patch("/clinic/status", updateClinicStatus);
 
 // Queue Management

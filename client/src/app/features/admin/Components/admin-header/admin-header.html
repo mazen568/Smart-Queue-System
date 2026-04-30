@@ -1,0 +1,9 @@
+<header class="admin-header">
+  <div class="header-left">
+    <h1 class="h1">{{ title }}</h1>
+    <p class="caption" *ngIf="caption">{{ caption }}</p>
+  </div>
+  <div class="header-actions">
+    <ng-content></ng-content>
+  </div>
+</header>
