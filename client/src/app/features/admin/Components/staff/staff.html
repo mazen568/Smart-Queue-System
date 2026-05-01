@@ -4,11 +4,48 @@
     <app-admin-button label="Invite user" icon="person_add" (onClick)="toggleInviteModal()">
     </app-admin-button>
   </app-admin-header>
+  
+  <div class="filter-bar">
+    <div class="search-input-wrapper">
+      <span class="material-symbols-outlined search-icon">search</span>
+      <input type="text" placeholder="Search staff by name or email..." [ngModel]="searchQuery()" (ngModelChange)="onSearch($event)">
+    </div>
+  </div>
 
 
   @if (loading() && staff().length === 0) {
   <div class="staff-list-container surface shadow-soft">
-    <div class="skeleton-row shimmer" *ngFor="let i of [1,2,3,4,5]"></div>
+    <table class="staff-table">
+      <thead>
+        <tr>
+          <th>MEMBER</th>
+          <th>ROLE</th>
+          <th>STATUS</th>
+          <th class="col-actions">ACTIONS</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let i of [1,2,3,4,5]">
+          <td>
+            <div style="display: flex; gap: 16px; align-items: center;">
+              <div class="shimmer" style="width: 40px; height: 40px; border-radius: 50%;"></div>
+              <div style="display: flex; flex-direction: column; gap: 8px;">
+                <div class="shimmer" style="width: 120px; height: 16px; border-radius: 4px;"></div>
+                <div class="shimmer" style="width: 80px; height: 12px; border-radius: 4px;"></div>
+              </div>
+            </div>
+          </td>
+          <td><div class="shimmer" style="width: 80px; height: 24px; border-radius: 12px;"></div></td>
+          <td><div class="shimmer" style="width: 70px; height: 20px; border-radius: 4px;"></div></td>
+          <td class="col-actions">
+            <div style="display: flex; justify-content: flex-end; gap: 8px;">
+              <div class="shimmer" style="width: 40px; height: 40px; border-radius: 50%;"></div>
+              <div class="shimmer" style="width: 40px; height: 40px; border-radius: 50%;"></div>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
   </div>
   } @else {
   <div class="staff-list-container surface shadow-soft">
@@ -22,7 +59,7 @@
         </tr>
       </thead>
       <tbody>
-        @for (member of staff(); track (member._id || member.id)) {
+        @for (member of staff(); track (member.id)) {
         <tr>
           <td>
             <div class="member-info">
@@ -59,21 +96,38 @@
         } @empty {
         <tr>
           <td colspan="4" class="empty-row">
-            <div class="empty-state">
-              <span class="material-symbols-outlined">group_off</span>
-              <p>No staff members found.</p>
+            <div class="empty-state" style="padding: var(--space-12); background: var(--surface-elevated); border-radius: var(--radius-lg); border: 1px dashed var(--border);">
+              <span class="material-symbols-outlined" style="font-size: 48px; color: var(--border); margin-bottom: var(--space-4);">group_off</span>
+              <h4 class="h3" style="margin-bottom: 4px;">No staff members</h4>
+              <p class="caption">Invite users to help manage the front desk.</p>
             </div>
           </td>
         </tr>
         }
       </tbody>
     </table>
+
+    <div class="table-footer">
+      <div class="pagination-info">
+        Showing {{ staff().length }} of {{ pagination().total }} members
+      </div>
+      <div class="pagination-controls">
+        <button class="page-btn" [disabled]="pagination().page === 1" (click)="prevPage()">
+          <span class="material-symbols-outlined">chevron_left</span>
+        </button>
+        <span class="page-current">{{ pagination().page }} of {{ pagination().pages }}</span>
+        <button class="page-btn" [disabled]="pagination().page === pagination().pages" (click)="nextPage()">
+          <span class="material-symbols-outlined">chevron_right</span>
+        </button>
+      </div>
+    </div>
   </div>
   }
 
   <!-- Invite Modal -->
   @if (showInviteModal()) {
   <app-modal title="Invite Staff Member" primaryActionLabel="Create Account" [isPrimaryLoading]="saving()"
+    variant="info" icon="person_add"
     (close)="toggleInviteModal()" (primaryAction)="inviteStaff()">
 
     <div class="modal-form">
@@ -108,6 +162,7 @@
   <!-- Reset Password Modal -->
   @if (showResetModal()) {
   <app-modal title="Reset Staff Password" primaryActionLabel="Update Password" [isPrimaryLoading]="saving()" 
+    variant="warning" icon="lock_reset"
     (close)="showResetModal.set(false)" (primaryAction)="confirmResetPassword()">
     <div class="modal-form">
       <p>Set a new password for <strong>{{ selectedUser()?.name }}</strong>.</p>
@@ -122,16 +177,6 @@
 
       <p class="caption danger-text">Please ensure the staff member is notified of their new credentials.</p>
     </div>
-  </app-modal>
-  }
-
-
-  <!-- Delete Confirmation Modal -->
-  @if (showDeleteConfirm()) {
-  <app-modal title="Remove Staff Access" primaryActionLabel="Remove Access" [isPrimaryLoading]="saving()" 
-    (close)="showDeleteConfirm.set(false)" (primaryAction)="confirmDelete()">
-    <p>Are you sure you want to remove <strong>{{ selectedUser()?.name }}</strong> from the clinic staff?</p>
-    <p class="caption danger-text" style="margin-top: var(--space-2);">This user will lose all access immediately.</p>
   </app-modal>
   }
 </div>

@@ -7,6 +7,7 @@ import { ModalComponent } from '../../../../shared/Components/modal/modal';
 import { AdminHeaderComponent } from '../admin-header/admin-header';
 import { AdminButtonComponent } from '../admin-button/admin-button';
 import { ToastService } from '../../../../shared/services/toast.service';
+import { ConfirmDialogService } from '../../../../shared/services/confirm-dialog.service';
 
 @Component({
   selector: 'app-staff',
@@ -18,14 +19,18 @@ import { ToastService } from '../../../../shared/services/toast.service';
 export class StaffComponent implements OnInit {
   private adminApi = inject(AdminApiService);
   private toastService = inject(ToastService);
+  private confirmService = inject(ConfirmDialogService);
 
   staff = signal<User[]>([]);
+  pagination = signal({ page: 1, total: 0, pages: 1 });
+  searchQuery = signal('');
+  limit = 5;
+  
   loading = signal(true);
   saving = signal(false);
   error = signal<string | null>(null);
 
   showInviteModal = signal(false);
-  showDeleteConfirm = signal(false);
   showResetModal = signal(false);
   
   selectedUser = signal<User | null>(null);
@@ -45,13 +50,12 @@ export class StaffComponent implements OnInit {
     this.loadStaff();
   }
 
-  loadStaff() {
+  loadStaff(page: number = 1) {
     this.loading.set(true);
-    this.adminApi.getStaff().subscribe({
-      next: (data) => {
-        console.log(data);
-        
-        this.staff.set(data);
+    this.adminApi.getStaff(page, this.limit, this.searchQuery()).subscribe({
+      next: (res) => {
+        this.staff.set(res.data);
+        this.pagination.set(res.pagination);
         this.loading.set(false);
       },
       error: () => {
@@ -59,6 +63,23 @@ export class StaffComponent implements OnInit {
         this.loading.set(false);
       }
     });
+  }
+
+  onSearch(query: string) {
+    this.searchQuery.set(query);
+    this.loadStaff(1);
+  }
+
+  nextPage() {
+    if (this.pagination().page < this.pagination().pages) {
+      this.loadStaff(this.pagination().page + 1);
+    }
+  }
+
+  prevPage() {
+    if (this.pagination().page > 1) {
+      this.loadStaff(this.pagination().page - 1);
+    }
   }
 
   toggleInviteModal() {
@@ -126,7 +147,17 @@ export class StaffComponent implements OnInit {
 
   deleteStaff(user: User) {
     this.selectedUser.set(user);
-    this.showDeleteConfirm.set(true);
+    
+    this.confirmService.confirm({
+      title: 'Remove Staff Access',
+      message: `Are you sure you want to remove ${user.name} from the clinic staff?`,
+      confirmText: 'Remove Access',
+      type: 'danger'
+    }).then(confirmed => {
+      if (confirmed) {
+        this.confirmDelete();
+      }
+    });
   }
 
   confirmDelete() {
@@ -138,7 +169,6 @@ export class StaffComponent implements OnInit {
     this.adminApi.deleteStaff(userId).subscribe({
       next: () => {
         this.loadStaff();
-        this.showDeleteConfirm.set(false);
         this.selectedUser.set(null);
         this.saving.set(false);
         this.toastService.success('Staff member removed successfully');

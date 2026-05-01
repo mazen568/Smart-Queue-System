@@ -1,6 +1,8 @@
 import { Component, EventEmitter, Input, Output, HostListener, ChangeDetectorRef, inject, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
+export type ModalVariant = 'default' | 'danger' | 'success' | 'info' | 'warning';
+
 @Component({
   selector: 'app-modal',
   standalone: true,
@@ -14,6 +16,8 @@ export class ModalComponent implements OnChanges {
   @Input() title = '';
   @Input() primaryActionLabel = '';
   @Input() secondaryActionLabel = 'Cancel';
+  @Input() variant: ModalVariant = 'default';
+  @Input() icon?: string;
   @Input() isPrimaryDisabled = false;
   @Input() isPrimaryLoading = false;
   @Input() showFooter = true;

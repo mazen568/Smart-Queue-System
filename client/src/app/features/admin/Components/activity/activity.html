@@ -1,0 +1,54 @@
+<div class="activity-page fade-in-up">
+  <app-admin-header title="Audit Logs" caption="Track every administrative action across your clinic.">
+  </app-admin-header>
+
+  <div class="activity-container surface shadow-soft">
+    @if (loading() && logs().length === 0) {
+      <div class="loading-state">
+        <div class="shimmer" style="width: 100%; height: 60px; margin-bottom: 12px; border-radius: 8px;" *ngFor="let i of [1,2,3,4,5]"></div>
+      </div>
+    } @else {
+      <div class="timeline">
+        @for (log of logs(); track log._id) {
+          <div class="timeline-item">
+            <div class="timeline-icon" [ngClass]="getActionClass(log.action)">
+              <span class="material-symbols-outlined">{{ getActionIcon(log.action) }}</span>
+            </div>
+            <div class="timeline-content">
+              <div class="timeline-header">
+                <span class="admin-name">{{ log.user.name }}</span>
+                <span class="action-time">{{ log.createdAt | date:'short' }}</span>
+              </div>
+              <div class="action-details">{{ log.details }}</div>
+              <div class="action-metadata">
+                <span class="badge">{{ log.action }}</span>
+                <span class="ip" *ngIf="log.ipAddress">IP: {{ log.ipAddress }}</span>
+              </div>
+            </div>
+          </div>
+        } @empty {
+          <div class="empty-state">
+            <span class="material-symbols-outlined">history</span>
+            <h4>No activity recorded yet</h4>
+            <p>Actions performed by admins will appear here.</p>
+          </div>
+        }
+      </div>
+
+      <div class="table-footer">
+        <div class="pagination-info">
+          Total {{ pagination().total }} actions recorded
+        </div>
+        <div class="pagination-controls">
+          <button class="page-btn" [disabled]="pagination().page === 1" (click)="prevPage()">
+            <span class="material-symbols-outlined">chevron_left</span>
+          </button>
+          <span class="page-current">{{ pagination().page }} of {{ pagination().pages }}</span>
+          <button class="page-btn" [disabled]="pagination().page === pagination().pages" (click)='nextPage()'>
+            <span class="material-symbols-outlined">chevron_right</span>
+          </button>
+        </div>
+      </div>
+    }
+  </div>
+</div>

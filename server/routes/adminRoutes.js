@@ -15,6 +15,8 @@ import {
   callTicket,
   completeTicket,
   uploadLogo,
+  getActivity,
+  globalSearch,
 } from "../controllers/adminController.js";
 import authenticate from "../middlewares/authenticationMiddleware.js";
 import authorize from "../middlewares/authorizationMiddleware.js";
@@ -55,5 +57,9 @@ router.get("/overview", getOverviewStats);
 // Tickets (for queue operations / patient real-time updates)
 router.post("/tickets/:id/call", callTicket);
 router.post("/tickets/:id/done", completeTicket);
+
+// Activity & Search
+router.get("/activity", getActivity);
+router.get("/search", globalSearch);
 
 export default router;

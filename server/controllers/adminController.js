@@ -4,6 +4,8 @@ import Clinic from "../models/clinicModel.js";
 import Queue from "../models/queueModel.js";
 import User from "../models/userModel.js";
 import Ticket from "../models/ticketModel.js";
+import AuditLog from "../models/auditLogModel.js";
+import { logAction } from "../services/auditService.js";
 import { AppError } from "../helpers/AppError.js";
 import { getIO } from "../config/socket.config.js";
 
@@ -44,6 +46,8 @@ export const updateClinicDetails = async (req, res, next) => {
       return next(new AppError("Clinic not found", 404));
     }
 
+    await logAction(req.user.clinicId, req.user._id, 'UPDATE_SETTINGS', 'Updated clinic details', req);
+
     res.status(200).json({
       success: true,
       data: clinic,
@@ -75,6 +79,8 @@ export const updateClinicStatus = async (req, res, next) => {
       return next(new AppError("Clinic not found", 404));
     }
 
+    await logAction(req.user.clinicId, req.user._id, 'UPDATE_SETTINGS', `Clinic ${clinic.isActive ? "activated" : "deactivated"}`, req);
+
     res.status(200).json({
       success: true,
       data: { isActive: clinic.isActive },
@@ -100,6 +106,8 @@ export const createQueue = async (req, res, next) => {
       clinicId: req.user.clinicId,
     });
 
+    await logAction(req.user.clinicId, req.user._id, 'CREATE_QUEUE', `Created queue: ${queue.name}`, req);
+
     res.status(201).json({
       success: true,
       data: queue,
@@ -116,13 +124,30 @@ export const createQueue = async (req, res, next) => {
 export const getQueues = async (req, res, next) => {
   try {
     const clinicId = req.user.clinicId;
+    
+    // Pagination & Search params
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 50;
+    const skip = (page - 1) * limit;
+    const search = req.query.search || '';
+
+    const matchQuery = {
+      clinicId: new mongoose.Types.ObjectId(String(clinicId)),
+      isActive: { $ne: false },
+    };
+
+    if (search) {
+      matchQuery.name = { $regex: search, $options: 'i' };
+    }
+
+    const total = await Queue.countDocuments(matchQuery);
+
     const queues = await Queue.aggregate([
       {
-        $match: {
-          clinicId: new mongoose.Types.ObjectId(String(clinicId)),
-          isActive: { $ne: false },
-        },
+        $match: matchQuery,
       },
+      { $skip: skip },
+      { $limit: limit },
       {
         $lookup: {
           from: "tickets",
@@ -158,6 +183,11 @@ export const getQueues = async (req, res, next) => {
     res.status(200).json({
       success: true,
       data: queues,
+      pagination: {
+        total,
+        page,
+        pages: Math.ceil(total / limit)
+      },
       message: "Queues fetched successfully",
     });
   } catch (error) {
@@ -178,6 +208,8 @@ export const updateQueue = async (req, res, next) => {
       { new: true, runValidators: true }
     );
 
+    await logAction(req.user.clinicId, req.user._id, 'UPDATE_QUEUE', `Updated queue: ${queue.name}`, req);
+
     res.status(200).json({
       success: true,
       data: queue,
@@ -193,7 +225,9 @@ export const updateQueue = async (req, res, next) => {
 // @access  Private (Admin)
 export const deleteQueue = async (req, res, next) => {
   try {
-    await Queue.findByIdAndUpdate(req.params.id, { isActive: false });
+    const queue = await Queue.findByIdAndUpdate(req.params.id, { isActive: false });
+
+    await logAction(req.user.clinicId, req.user._id, 'DELETE_QUEUE', `Deleted queue: ${queue.name}`, req);
 
     res.status(200).json({
       success: true,
@@ -214,6 +248,8 @@ export const resetQueue = async (req, res, next) => {
       { currentNumber: 0 },
       { new: true }
     );
+
+    await logAction(req.user.clinicId, req.user._id, 'RESET_QUEUE', `Reset queue counter for: ${queue.name}`, req);
 
     res.status(200).json({
       success: true,
@@ -247,6 +283,8 @@ export const createStaff = async (req, res, next) => {
       clinicId: req.user.clinicId,
     });
 
+    await logAction(req.user.clinicId, req.user._id, 'CREATE_STAFF', `Created staff account for: ${staff.email}`, req);
+
     res.status(201).json({
       success: true,
       data: {
@@ -267,14 +305,34 @@ export const createStaff = async (req, res, next) => {
 // @access  Private (Admin)
 export const getStaff = async (req, res, next) => {
   try {
-    const staff = await User.find({
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+    const search = req.query.search || '';
+
+    const query = {
       clinicId: req.user.clinicId,
       role: "reception",
-    });
+    };
+
+    if (search) {
+      query.$or = [
+        { name: { $regex: search, $options: 'i' } },
+        { email: { $regex: search, $options: 'i' } }
+      ];
+    }
+
+    const total = await User.countDocuments(query);
+    const staff = await User.find(query).skip(skip).limit(limit).select("-password");
 
     res.status(200).json({
       success: true,
       data: staff,
+      pagination: {
+        total,
+        page,
+        pages: Math.ceil(total / limit)
+      },
       message: "Staff list fetched successfully",
     });
   } catch (error) {
@@ -287,7 +345,11 @@ export const getStaff = async (req, res, next) => {
 // @access  Private (Admin)
 export const deleteStaff = async (req, res, next) => {
   try {
-    await User.findByIdAndDelete(req.params.id);
+    const deletedStaff = await User.findByIdAndDelete(req.params.id);
+
+    if (deletedStaff) {
+      await logAction(req.user.clinicId, req.user._id, 'DELETE_STAFF', `Removed staff account: ${deletedStaff.email}`, req);
+    }
 
     res.status(200).json({
       success: true,
@@ -315,6 +377,8 @@ export const resetStaffPassword = async (req, res, next) => {
 
     user.password = password;
     await user.save();
+
+    await logAction(req.user.clinicId, req.user._id, 'RESET_PASSWORD', `Reset password for staff: ${user.email}`, req);
 
     res.status(200).json({
       success: true,
@@ -513,6 +577,8 @@ export const callTicket = async (req, res, next) => {
       return next(new AppError("Ticket not found, unauthorized, or already processed", 404));
     }
 
+    await logAction(req.user.clinicId, req.user._id, 'CALL_TICKET', `Called patient: P-${ticket.number}`, req);
+
     const io = getIO();
     io.to(`clinic:${ticket.clinicId}`).emit("ticketCalled", {
       ticketId: ticket._id,
@@ -556,6 +622,8 @@ export const completeTicket = async (req, res, next) => {
       $inc: { totalServedCount: 1 }
     });
 
+    await logAction(req.user.clinicId, req.user._id, 'COMPLETE_TICKET', `Completed patient: P-${ticket.number}`, req);
+
     const io = getIO();
     io.to(`clinic:${ticket.clinicId}`).emit("ticketDone", {
       ticketId: ticket._id,
@@ -598,6 +666,8 @@ export const uploadLogo = async (req, res, next) => {
     clinic.logoUrl = logoUrl;
     await clinic.save();
 
+    await logAction(req.user.clinicId, req.user._id, 'UPDATE_SETTINGS', `Uploaded new clinic logo`, req);
+
     res.status(200).json({
       success: true,
       data: { logoUrl },
@@ -607,3 +677,92 @@ export const uploadLogo = async (req, res, next) => {
     next(error);
   }
 };
+
+// @desc    Get clinic activity (audit logs)
+// @route   GET /api/admin/activity
+// @access  Private (Admin)
+export const getActivity = async (req, res, next) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 20;
+    const skip = (page - 1) * limit;
+
+    const query = { clinic: req.user.clinicId };
+
+    const total = await AuditLog.countDocuments(query);
+    const logs = await AuditLog.find(query)
+      .populate('user', 'name email role')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    res.status(200).json({
+      success: true,
+      data: logs,
+      pagination: {
+        total,
+        page,
+        pages: Math.ceil(total / limit)
+      },
+      message: "Activity logs fetched successfully",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Global search across patients, queues, and staff
+// @route   GET /api/admin/search
+// @access  Private (Admin)
+export const globalSearch = async (req, res, next) => {
+  try {
+    const { q } = req.query;
+    if (!q || q.length < 2) {
+      return res.status(200).json({ success: true, data: { staff: [], queues: [], patients: [] } });
+    }
+
+    const clinicId = req.user.clinicId;
+    const regex = new RegExp(q, 'i');
+
+    const [staff, queues, patients] = await Promise.all([
+      User.find({
+        clinicId,
+        role: "reception",
+        $or: [{ name: regex }, { email: regex }]
+      }).limit(5).select("name email role"),
+      
+      Queue.find({
+        clinicId,
+        isActive: true,
+        name: regex
+      }).limit(5).select("name currentNumber"),
+      
+      Ticket.find({
+        clinicId,
+        $or: [{ number: regex }]
+      }).limit(5).select("number status createdAt queueId").populate('queueId', 'name')
+    ]);
+
+    // Format patients to match UI needs
+    const formattedPatients = patients.map(p => ({
+      _id: p._id,
+      number: p.number,
+      status: p.status,
+      queueName: p.queueId ? p.queueId.name : 'Unknown Queue',
+      createdAt: p.createdAt
+    }));
+
+    res.status(200).json({
+      success: true,
+      data: {
+        staff,
+        queues,
+        patients: formattedPatients
+      },
+      message: "Search completed successfully",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+

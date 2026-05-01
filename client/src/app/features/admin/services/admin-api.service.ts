@@ -1,11 +1,12 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
+import { HttpParams } from '@angular/common/http';
 import { map, Observable } from 'rxjs';
 import { Clinic, Queue } from '../../../types/queue';
 import { User } from '../../../types/user';
 
-import { DashboardStats, LiveQueue, TicketActivity } from '../../../types/dashboard';
+import { AuditLog, DashboardStats, GlobalSearchResults, LiveQueue, PaginatedResponse, TicketActivity } from '../../../types/dashboard';
 
 @Injectable({
   providedIn: 'root'
@@ -34,8 +35,14 @@ export class AdminApiService {
   }
 
   // --- Queue Management ---
-  getQueues(): Observable<Queue[]> {
-    return this.http.get<{ data: Queue[] }>(`${this.apiUrl}/queues`).pipe(map(res => res.data));
+  getQueues(page: number = 1, limit: number = 50, search: string = ''): Observable<PaginatedResponse<Queue>> {
+    let params = new HttpParams()
+      .set('page', page.toString())
+      .set('limit', limit.toString());
+    
+    if (search) params = params.set('search', search);
+
+    return this.http.get<PaginatedResponse<Queue>>(`${this.apiUrl}/queues`, { params });
   }
 
   createQueue(data: { name: string; avgServiceTime: number }): Observable<Queue> {
@@ -55,8 +62,14 @@ export class AdminApiService {
   }
 
   // --- Staff Management ---
-  getStaff(): Observable<User[]> {
-    return this.http.get<{ data: User[] }>(`${this.apiUrl}/staff`).pipe(map(res => res.data));
+  getStaff(page: number = 1, limit: number = 10, search: string = ''): Observable<PaginatedResponse<User>> {
+    let params = new HttpParams()
+      .set('page', page.toString())
+      .set('limit', limit.toString());
+
+    if (search) params = params.set('search', search);
+
+    return this.http.get<PaginatedResponse<User>>(`${this.apiUrl}/staff`, { params });
   }
 
   createStaff(data: Partial<User>): Observable<User> {
@@ -74,5 +87,19 @@ export class AdminApiService {
   // --- Overview ---
   getOverviewStats(): Observable<DashboardStats> {
     return this.http.get<{ data: DashboardStats }>(`${this.apiUrl}/overview`).pipe(map(res => res.data));
+  }
+
+  // --- Activity & Search ---
+  getActivity(page: number = 1, limit: number = 20): Observable<PaginatedResponse<AuditLog>> {
+    const params = new HttpParams()
+      .set('page', page.toString())
+      .set('limit', limit.toString());
+
+    return this.http.get<PaginatedResponse<AuditLog>>(`${this.apiUrl}/activity`, { params });
+  }
+
+  globalSearch(query: string): Observable<GlobalSearchResults> {
+    const params = new HttpParams().set('q', query);
+    return this.http.get<{ data: GlobalSearchResults }>(`${this.apiUrl}/search`, { params }).pipe(map(res => res.data));
   }
 }

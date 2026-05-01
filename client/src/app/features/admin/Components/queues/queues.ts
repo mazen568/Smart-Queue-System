@@ -7,6 +7,7 @@ import { ModalComponent } from '../../../../shared/Components/modal/modal';
 import { AdminHeaderComponent } from '../admin-header/admin-header';
 import { AdminButtonComponent } from '../admin-button/admin-button';
 import { ToastService } from '../../../../shared/services/toast.service';
+import { ConfirmDialogService } from '../../../../shared/services/confirm-dialog.service';
 
 @Component({
   selector: 'app-queues',
@@ -18,15 +19,18 @@ import { ToastService } from '../../../../shared/services/toast.service';
 export class QueuesComponent implements OnInit {
   private adminApi = inject(AdminApiService);
   private toastService = inject(ToastService);
+  private confirmService = inject(ConfirmDialogService);
 
   queues = signal<Queue[]>([]);
+  pagination = signal({ page: 1, total: 0, pages: 1 });
+  searchQuery = signal('');
+  limit = 10;
+
   loading = signal(true);
   saving = signal(false);
   error = signal<string | null>(null);
 
   showAddForm = signal(false);
-  showResetConfirm = signal(false);
-  showDeleteConfirm = signal(false);
   editingQueue = signal<Queue | null>(null);
   queueToReset = signal<string | null>(null);
   queueToDelete = signal<string | null>(null);
@@ -40,11 +44,12 @@ export class QueuesComponent implements OnInit {
     this.loadQueues();
   }
 
-  loadQueues() {
+  loadQueues(page: number = 1) {
     this.loading.set(true);
-    this.adminApi.getQueues().subscribe({
-      next: (data) => {
-        this.queues.set(data);
+    this.adminApi.getQueues(page, this.limit, this.searchQuery()).subscribe({
+      next: (res) => {
+        this.queues.set(res.data);
+        this.pagination.set(res.pagination);
         this.loading.set(false);
       },
       error: (err) => {
@@ -52,6 +57,23 @@ export class QueuesComponent implements OnInit {
         this.loading.set(false);
       }
     });
+  }
+
+  onSearch(query: string) {
+    this.searchQuery.set(query);
+    this.loadQueues(1);
+  }
+
+  nextPage() {
+    if (this.pagination().page < this.pagination().pages) {
+      this.loadQueues(this.pagination().page + 1);
+    }
+  }
+
+  prevPage() {
+    if (this.pagination().page > 1) {
+      this.loadQueues(this.pagination().page - 1);
+    }
   }
 
   toggleAddForm() {
@@ -109,7 +131,16 @@ export class QueuesComponent implements OnInit {
 
   deleteQueue(id: string) {
     this.queueToDelete.set(id);
-    this.showDeleteConfirm.set(true);
+    this.confirmService.confirm({
+      title: 'Delete Queue',
+      message: 'Are you sure you want to delete this queue? This will deactivate it and it will no longer be available for new tickets.',
+      confirmText: 'Delete Queue',
+      type: 'danger'
+    }).then(confirmed => {
+      if (confirmed) {
+        this.confirmDelete();
+      }
+    });
   }
 
   confirmDelete() {
@@ -119,7 +150,6 @@ export class QueuesComponent implements OnInit {
     this.adminApi.deleteQueue(id).subscribe({
       next: () => {
         this.loadQueues();
-        this.showDeleteConfirm.set(false);
         this.queueToDelete.set(null);
         this.toastService.success('Queue deleted successfully');
       },
@@ -129,7 +159,16 @@ export class QueuesComponent implements OnInit {
 
   resetCounter(id: string) {
     this.queueToReset.set(id);
-    this.showResetConfirm.set(true);
+    this.confirmService.confirm({
+      title: 'Reset Queue Counter',
+      message: 'Are you sure you want to reset the current number to 0 for this queue?',
+      confirmText: 'Reset Now',
+      type: 'warning'
+    }).then(confirmed => {
+      if (confirmed) {
+        this.confirmReset();
+      }
+    });
   }
 
   confirmReset() {
@@ -139,7 +178,6 @@ export class QueuesComponent implements OnInit {
     this.adminApi.resetQueue(id).subscribe({
       next: () => {
         this.loadQueues();
-        this.showResetConfirm.set(false);
         this.queueToReset.set(null);
         this.toastService.success('Queue counter reset successfully');
       },

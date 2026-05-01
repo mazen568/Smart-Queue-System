@@ -100,6 +100,11 @@ export const routes: Routes = [
         path: "credits",
         loadComponent: () => import("./features/admin/Components/credits/credits").then(c => c.CreditsComponent),
         title: "Credits"
+      },
+      {
+        path: "activity",
+        loadComponent: () => import("./features/admin/Components/activity/activity").then(c => c.ActivityComponent),
+        title: "Activity Log"
       }
     ]
   },

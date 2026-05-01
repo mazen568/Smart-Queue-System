@@ -24,3 +24,34 @@ export interface DashboardStats {
   waitingPatients: TicketActivity[];
   recentServed: TicketActivity[];
 }
+
+export interface AuditLog {
+  _id: string;
+  clinic: string;
+  user: {
+    _id: string;
+    name: string;
+    email: string;
+    role: string;
+  };
+  action: string;
+  details: string;
+  ipAddress?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface PaginatedResponse<T> {
+  data: T[];
+  pagination: {
+    total: number;
+    page: number;
+    pages: number;
+  };
+}
+
+export interface GlobalSearchResults {
+  staff: any[];
+  queues: any[];
+  patients: any[];
+}

@@ -9,6 +9,13 @@
       (onClick)="toggleAddForm()">
     </app-admin-button>
   </app-admin-header>
+  
+  <div class="filter-bar">
+    <div class="search-input-wrapper">
+      <span class="material-symbols-outlined search-icon">search</span>
+      <input type="text" placeholder="Search queues by name..." [ngModel]="searchQuery()" (ngModelChange)="onSearch($event)">
+    </div>
+  </div>
 
 
   <!-- Add/Edit Queue Modal -->
@@ -17,6 +24,7 @@
       [title]="editingQueue() ? 'Edit Queue' : 'Create New Queue'"
       [primaryActionLabel]="editingQueue() ? 'Update Queue' : 'Create Queue'"
       [isPrimaryLoading]="saving()"
+      variant="info" [icon]="editingQueue() ? 'settings' : 'add_circle'"
       (close)="toggleAddForm()"
       (primaryAction)="saveQueue()">
       
@@ -42,36 +50,24 @@
     </app-modal>
   }
 
-  <!-- Reset Confirmation Modal -->
-  @if (showResetConfirm()) {
-    <app-modal 
-      title="Reset Queue Counter"
-      primaryActionLabel="Reset Now"
-      [isPrimaryLoading]="saving()"
-      (close)="showResetConfirm.set(false)"
-      (primaryAction)="confirmReset()">
-      <p>Are you sure you want to reset the current number to 0 for this queue?</p>
-      <p class="caption" style="margin-top: var(--space-2); color: var(--danger);">This action cannot be undone and will reset the patient numbering for today.</p>
-    </app-modal>
-  }
-
-  <!-- Delete Confirmation Modal -->
-  @if (showDeleteConfirm()) {
-    <app-modal 
-      title="Delete Queue"
-      primaryActionLabel="Delete Queue"
-      [isPrimaryLoading]="saving()"
-      (close)="showDeleteConfirm.set(false)"
-      (primaryAction)="confirmDelete()">
-      <p>Are you sure you want to delete this queue? This will deactivate it and it will no longer be available for new tickets.</p>
-      <p class="caption" style="margin-top: var(--space-2); color: var(--danger);">This action is permanent.</p>
-    </app-modal>
-  }
-
   <!-- Loading State -->
   @if (loading() && queues().length === 0) {
     <div class="queues-list">
-      <div class="queue-skeleton surface shimmer" *ngFor="let i of [1,2,3]"></div>
+      <div class="queue-item surface" style="display: grid; grid-template-columns: 1.5fr 2fr auto; align-items: center; gap: var(--space-10);" *ngFor="let i of [1,2,3]">
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <div class="shimmer" style="width: 60px; height: 12px; border-radius: 4px;"></div>
+          <div class="shimmer" style="width: 120px; height: 24px; border-radius: 4px;"></div>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: var(--space-10);">
+          <div class="shimmer" style="width: 50px; height: 32px; border-radius: 4px;"></div>
+          <div class="shimmer" style="width: 50px; height: 32px; border-radius: 4px;"></div>
+          <div class="shimmer" style="width: 50px; height: 32px; border-radius: 4px;"></div>
+        </div>
+        <div style="display: flex; gap: var(--space-2);">
+          <div class="shimmer" style="width: 40px; height: 40px; border-radius: 50%;"></div>
+          <div class="shimmer" style="width: 40px; height: 40px; border-radius: 50%;"></div>
+        </div>
+      </div>
     </div>
   } @else {
     <div class="queues-list">
@@ -114,11 +110,22 @@
             </div>
           </div>
         </div>
-      } @empty {
-        <div class="empty-state">
-          <p class="caption">No queues found. Start by creating a new queue.</p>
-        </div>
       }
+      
+      <div class="list-footer">
+        <div class="pagination-info">
+          Showing {{ queues().length }} of {{ pagination().total }} queues
+        </div>
+        <div class="pagination-controls">
+          <button class="page-btn" [disabled]="pagination().page === 1" (click)="prevPage()">
+            <span class="material-symbols-outlined">chevron_left</span>
+          </button>
+          <span class="page-current">{{ pagination().page }} of {{ pagination().pages }}</span>
+          <button class="page-btn" [disabled]="pagination().page === pagination().pages" (click)="nextPage()">
+            <span class="material-symbols-outlined">chevron_right</span>
+          </button>
+        </div>
+      </div>
     </div>
   }
 </div>
