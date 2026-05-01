@@ -117,8 +117,18 @@ export const routes: Routes = [
       {
         path: "dashboard",
         loadComponent: () => import("./features/reception/Components/dashboard/dashboard").then(c => c.Dashboard)
+      },
+      {
+        path: "queue/:id",
+        loadComponent: () => import("./features/reception/Components/queue-control/queue-control").then(c => c.QueueControl)
       }
     ]
+  },
+  {
+    path: "reception/display",
+    loadComponent: () => import("./features/reception/Components/public-display/public-display").then(c => c.PublicDisplay),
+    canActivate: [authGuard, roleGuard],
+    data: { roles: ['reception'] }
   },
   {
     path: "unauthorized",

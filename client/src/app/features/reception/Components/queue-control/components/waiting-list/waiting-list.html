@@ -1,0 +1,35 @@
+<div class="waiting-list surface">
+  <div class="list-header">
+    <span class="caption">WAITING &middot; {{ data?.waitingCount || 0 }}</span>
+    <span class="caption muted">Auto-sorted</span>
+  </div>
+
+  <div class="list-body">
+    @if (data?.tickets?.length === 0) {
+      <div class="empty-list">
+        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="empty-icon"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+        <p class="muted">No patients waiting in queue.</p>
+      </div>
+    }
+
+    @for (t of data?.tickets; track t._id; let i = $index) {
+      <div class="ticket-row fade-in-up" [style.animation-delay]="i * 0.05 + 's'">
+        <div class="ticket-left">
+          <div class="position-circle">{{ i + 1 }}</div>
+          <div class="ticket-details">
+            <strong>A-{{ t.number.toString().padStart(3, '0') }}</strong>
+            <span class="caption muted">{{ t.customerName || 'Walk-in Patient' }}</span>
+          </div>
+        </div>
+        <div class="ticket-right">
+          <!-- First in line indicator -->
+          @if (i === 0) {
+            <span class="up-next">UP NEXT</span>
+          }
+          <!-- Action to call this specific person -->
+          <button class="btn btn-ghost hover-show" (click)="callSpecific.emit(t._id)">Call specifically</button>
+        </div>
+      </div>
+    }
+  </div>
+</div>

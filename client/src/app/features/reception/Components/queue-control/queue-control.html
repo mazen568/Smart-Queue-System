@@ -1,0 +1,70 @@
+<div class="control-container fade-in">
+  <!-- Top Bar -->
+  <div class="top-bar">
+    <a routerLink="/reception/dashboard" class="back-link">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+      All queues
+    </a>
+    <div class="queue-meta">
+      @if (stats()) {
+        <span class="live-dot pulse-soft"></span> Live &middot; synced &nbsp;&nbsp;&nbsp;
+        <span class="muted">{{ doctorName }} &middot; {{ department }}</span>
+      }
+    </div>
+  </div>
+
+  @if (isLoading()) {
+    <div class="layout-grid skeleton-layout fade-in">
+      <div class="skeleton-active surface">
+        <div class="skeleton-header">
+          <div class="shimmer-line short"></div>
+          <div class="shimmer-pill"></div>
+        </div>
+        <div class="skeleton-center">
+          <div class="shimmer-giant"></div>
+          <div class="shimmer-line medium"></div>
+        </div>
+      </div>
+      <div class="skeleton-list surface">
+        <div class="skeleton-header">
+          <div class="shimmer-line medium"></div>
+        </div>
+        <div class="skeleton-rows">
+          <div class="shimmer-row"></div>
+          <div class="shimmer-row"></div>
+          <div class="shimmer-row"></div>
+          <div class="shimmer-row"></div>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Main Layout -->
+  @if (!isLoading() && ticketsData()) {
+    <div class="layout-grid fade-in-up">
+      <!-- LEFT: ACTIVE DISPLAY -->
+      <app-active-display
+        [calledTicket]="ticketsData()?.calledTicket"
+        [stats]="stats()">
+      </app-active-display>
+
+      <!-- RIGHT: WAITING LIST -->
+      <app-waiting-list
+        [data]="ticketsData()"
+        (callSpecific)="callSpecific($event)">
+      </app-waiting-list>
+    </div>
+
+    <!-- FLOATING ACTION BAR -->
+    <app-action-bar
+      [isProcessing]="isProcessing()"
+      [waitingCount]="ticketsData()?.waitingCount || 0"
+      [hasNextTicket]="!!ticketsData()?.nextTicket"
+      [hasCalledTicket]="!!ticketsData()?.calledTicket"
+      (callNext)="callNext()"
+      (skip)="skip()"
+      (recall)="recall()"
+      (markDone)="markDone()">
+    </app-action-bar>
+  }
+</div>

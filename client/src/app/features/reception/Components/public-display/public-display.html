@@ -1,0 +1,97 @@
+<div class="tv-container">
+  @if (!isConnected()) {
+    <div class="offline-banner">
+      🔴 LIVE SYNC PAUSED - RECONNECTING...
+    </div>
+  }
+
+  @if (!audioUnlocked()) {
+    <div class="audio-overlay" (click)="unlockAudio()">
+      <div class="overlay-content">
+        <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path><path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path></svg>
+        <h2>Click to Enable Audio</h2>
+        <p>Browsers require interaction before playing live announcements.</p>
+      </div>
+    </div>
+  }
+
+  <!-- Premium Background Waves SVG -->
+  <svg class="bg-waves" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" preserveAspectRatio="none" viewBox="0 0 1440 900">
+    <!-- Bottom Left Waves -->
+    <path d="M-100,950 C200,700 500,1000 900,600 C1300,200 1500,400 1600,200" fill="none" stroke="currentColor" stroke-width="2" class="wave-1"/>
+    <path d="M-100,1050 C300,800 600,1100 1000,700 C1400,300 1550,500 1600,300" fill="none" stroke="currentColor" stroke-width="1.5" class="wave-2"/>
+    <path d="M-100,1150 C400,900 700,1200 1100,800 C1500,400 1600,600 1600,400" fill="none" stroke="currentColor" stroke-width="1" class="wave-3"/>
+    
+    <!-- Top Right Waves -->
+    <path d="M800,-100 C1100,200 1200,50 1600,300" fill="none" stroke="currentColor" stroke-width="1.5" class="wave-1"/>
+    <path d="M1000,-100 C1300,300 1400,150 1600,400" fill="none" stroke="currentColor" stroke-width="1" class="wave-2"/>
+  </svg>
+  <header class="tv-header">
+    <div class="logo">
+      <span class="brand-p">P</span>
+      <span class="brand-text">Pulse.clinic</span>
+    </div>
+
+    <div class="header-center">
+      <h2>Live Queue</h2>
+      <div class="live-badge">
+        <span class="pulse-dot"></span> LIVE
+      </div>
+    </div>
+
+    <div class="header-right">
+      <div class="time">{{ currentTime() | date:'shortTime' }}</div>
+      <div class="date">{{ currentTime() | date:'mediumDate' }}</div>
+    </div>
+  </header>
+
+  <main class="tv-grid">
+    @if (isLoading()) {
+      <div class="tv-card skeleton">
+        <div class="tv-card-header" style="width: 100%">
+          <div class="skeleton-title"></div>
+          <div class="skeleton-text" style="width: 40%; margin: 10px auto;"></div>
+        </div>
+        <div class="skeleton-number"></div>
+        <div class="skeleton-text" style="width: 30%; margin: 0 auto;"></div>
+      </div>
+      <div class="tv-card skeleton">
+        <div class="tv-card-header" style="width: 100%">
+          <div class="skeleton-title"></div>
+          <div class="skeleton-text" style="width: 40%; margin: 10px auto;"></div>
+        </div>
+        <div class="skeleton-number"></div>
+        <div class="skeleton-text" style="width: 30%; margin: 0 auto;"></div>
+      </div>
+      <div class="tv-card skeleton">
+        <div class="tv-card-header" style="width: 100%">
+          <div class="skeleton-title"></div>
+          <div class="skeleton-text" style="width: 40%; margin: 10px auto;"></div>
+        </div>
+        <div class="skeleton-number"></div>
+        <div class="skeleton-text" style="width: 30%; margin: 0 auto;"></div>
+      </div>
+    } @else {
+      @for (q of queues(); track q._id) {
+        <div class="tv-card" [class.flash]="flashQueueId() === q._id" [class.empty]="!q.currentlyServing">
+          <div class="tv-card-header">
+            <h2>{{ q.name.split('-')[0]?.trim() || q.name }}</h2>
+            <span class="dept">{{ q.name.split('-')[1]?.trim() || 'General' }}</span>
+          </div>
+          <div class="tv-card-body">
+            <div class="ticket-number">
+              {{ q.currentlyServing ? 'A-' + q.currentlyServing.toString().padStart(3, '0') : '--' }}
+            </div>
+          </div>
+          <div class="tv-card-footer">
+            {{ q.waitingCount || 0 }} ahead
+          </div>
+        </div>
+      }
+    }
+  </main>
+
+  <footer class="tv-footer">
+    Thank you for your patience. We appreciate it. <span class="heart">🤍</span>
+  </footer>
+</div>

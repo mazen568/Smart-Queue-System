@@ -1,0 +1,47 @@
+<div class="active-display surface-elevated">
+  <div class="display-header">
+    <span class="caption display-title">NOW SERVING</span>
+    @if (calledTicket) {
+      <div class="status-pill pulse-in">
+        <span class="dot blue"></span> In room
+      </div>
+    }
+  </div>
+
+  <div class="display-center" [class.empty]="!calledTicket">
+    <h1 class="giant-number">
+      @if (calledTicket) {
+        A-{{ calledTicket.number.toString().padStart(3, '0') }}
+      } @else {
+        --
+      }
+    </h1>
+    <div class="patient-name">
+      {{ calledTicket?.customerName || 'Waiting for next patient...' }}
+    </div>
+  </div>
+
+  <div class="display-footer">
+    <div class="stats-row">
+      <div class="stat-item">
+        <span class="caption">QUEUE</span>
+        <strong>{{ stats?.waitingCount || 0 }}</strong>
+      </div>
+      <div class="stat-item">
+        <span class="caption">SERVED</span>
+        <strong>{{ stats?.servedToday || 0 }}</strong>
+      </div>
+      <div class="stat-item">
+        <span class="caption">AVG. WAIT</span>
+        <strong>{{ stats?.avgServiceTime || 0 | number:'1.0-0' }} min</strong>
+      </div>
+    </div>
+
+    <div class="shortcuts-hint">
+      <span><kbd>N</kbd> Next</span> &middot;
+      <span><kbd>S</kbd> Skip</span> &middot;
+      <span><kbd>R</kbd> Recall</span> &middot;
+      <span><kbd>D</kbd> Done</span>
+    </div>
+  </div>
+</div>

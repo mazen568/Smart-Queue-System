@@ -11,9 +11,12 @@
     <div class="staff-cta">
       @if (user()) {
         <div class="staff-cta__actions">
-          <span class="btn btn-primary" [routerLink]="dashboardUrl()">
-            Go to {{ dashboardLabel() }}
-          </span>
+          @if (!isAtDashboard()) {
+            <span class="btn btn-primary" [routerLink]="dashboardUrl()">
+              Go to {{ dashboardLabel() }}
+            </span>
+          }
+          <span class="btn btn-outline" style="border-color: rgba(0,0,0,0.1); color: var(--muted-foreground);" (click)="logout()">Sign out</span>
         </div>
       } @else {
         <p class="caption staff-cta__text">
