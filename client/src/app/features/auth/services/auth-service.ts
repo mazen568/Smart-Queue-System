@@ -3,7 +3,7 @@ import { User } from '../../../types/user';
 import { HttpClient } from '@angular/common/http';
 import { loginForm, registerForm } from '../../../types/forms';
 import { environment } from '../../../../environments/environment';
-import { finalize, tap } from 'rxjs';
+import { finalize, Observable, tap } from 'rxjs';
 import { refreshDTO, UserDTO } from '../../../types/auth.dto';
 
 @Injectable({
@@ -78,5 +78,4 @@ export class AuthService {
       return null;
     }
   }
-
 }

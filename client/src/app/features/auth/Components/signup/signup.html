@@ -1,71 +1,142 @@
-<div class="auth-page">
-  <div class="auth-card surface shadow-zone fade-in-up">
-    <div class="auth-header">
-      <h2 style="margin: 0;">Create your account</h2>
-      <p class="caption" style="margin: 6px 0 0;">It takes less than a minute.</p>
+<div class="auth-card">
+  <div class="auth-header">
+    <h2 class="welcome-title">Get started for free</h2>
+    <h1 class="main-title">Join the <span class="accent-text">Pulse</span> community</h1>
+    <p class="subtitle">Streamline your clinic operations and enhance patient experience today.</p>
+  </div>
+
+  <!-- Social Logins -->
+  <div class="social-grid">
+    <button type="button" class="social-btn">
+      <img src="https://www.google.com/favicon.ico" alt="Google" />
+      <span>Continue with Google</span>
+    </button>
+    <button type="button" class="social-btn">
+      <img src="https://www.facebook.com/favicon.ico" alt="Facebook" />
+      <span>Continue with Facebook</span>
+    </button>
+  </div>
+
+  <div class="form-divider">
+    <span>or sign up with email</span>
+  </div>
+
+  <!-- Error Banner -->
+  <div class="error-banner" *ngIf="serverError()">
+    <div class="error-icon">
+      <span class="material-symbols-outlined">error</span>
     </div>
+    <div class="error-content">
+      <span class="error-title">Signup Failed</span>
+      <span class="error-message">{{ serverError() }}</span>
+    </div>
+  </div>
 
-    <form class="auth-form" [formGroup]="form" (ngSubmit)="submit()">
-      <div class="grid-2">
-        <div class="field">
-          <label class="caption" for="name">Name</label>
-          <input id="name" type="text" formControlName="name" placeholder="Your name" />
-          <p class="caption error" *ngIf="form.controls.name.touched && form.controls.name.invalid">
-            Name is required.
-          </p>
-        </div>
-
-        <div class="field">
-          <label class="caption" for="clinicName">Clinic name</label>
-          <input id="clinicName" type="text" formControlName="clinicName" placeholder="Clinic name" />
-          <p class="caption error" *ngIf="form.controls.clinicName.touched && form.controls.clinicName.invalid">
-            Clinic name is required.
-          </p>
-        </div>
-      </div>
-
+  <form [formGroup]="form" (ngSubmit)="submit()" class="auth-form">
+    <!-- Row 1: Name & Clinic -->
+    <div class="form-row">
       <div class="field">
-        <label class="caption" for="email">Email</label>
-        <input id="email" type="email" formControlName="email" placeholder="name@example.com" />
-        <p class="caption error" *ngIf="form.controls.email.touched && form.controls.email.invalid">
-          Please enter a valid email.
-        </p>
-      </div>
-
-      <div class="grid-2">
-        <div class="field">
-          <label class="caption" for="password">Password</label>
-          <input id="password" type="password" formControlName="password" placeholder="••••••••" />
-          <p class="caption error" *ngIf="form.controls.password.touched && form.controls.password.invalid">
-            Password must be at least 6 characters.
-          </p>
+        <div class="input-container">
+          <span class="material-symbols-outlined input-icon">person</span>
+          <input type="text" formControlName="name" class="auth-input" [class.invalid]="form.controls.name.touched && form.controls.name.invalid" placeholder="e.g. John Doe" />
         </div>
-
-        <div class="field">
-          <label class="caption" for="confirmPassword">Confirm password</label>
-          <input id="confirmPassword" type="password" formControlName="confirmPassword" placeholder="••••••••" />
-          <p
-            class="caption error"
-            *ngIf="
-              form.controls.confirmPassword.touched &&
-              (form.controls.confirmPassword.invalid || form.errors?.['passwordMismatch'])
-            "
-          >
-            Passwords must match.
-          </p>
-        </div>
+        <span class="inline-error" *ngIf="form.controls.name.touched && form.controls.name.invalid">Please enter your full name</span>
       </div>
-
-      <p class="caption error" *ngIf="serverError()">{{ serverError() }}</p>
-
-      <button class="btn btn-primary" type="submit" [disabled]="isSubmitting()">
-        {{ isSubmitting() ? 'Creating…' : 'Create account' }}
-      </button>
-    </form>
-
-    <div class="auth-footer caption">
-      Already have an account?
-      <a routerLink="/auth/login">Sign in</a>
+      <div class="field">
+        <div class="input-container">
+          <span class="material-symbols-outlined input-icon">apartment</span>
+          <input type="text" formControlName="clinicName" class="auth-input" [class.invalid]="form.controls.clinicName.touched && form.controls.clinicName.invalid" placeholder="e.g. Pulse Medical" />
+        </div>
+        <span class="inline-error" *ngIf="form.controls.clinicName.touched && form.controls.clinicName.invalid">Clinic name is required</span>
+      </div>
     </div>
+
+    <div class="field">
+      <div class="input-container">
+        <span class="material-symbols-outlined input-icon">mail</span>
+        <input type="email" formControlName="email" class="auth-input" [class.invalid]="form.controls.email.touched && form.controls.email.invalid" placeholder="Work Email" />
+      </div>
+      <span class="inline-error" *ngIf="form.controls.email.touched && form.controls.email.invalid">
+        {{ form.controls.email.errors?.['required'] ? 'Please enter your work email' : 'The email address format is incorrect' }}
+      </span>
+    </div>
+
+    <!-- Password Field -->
+    <div class="field">
+      <div class="input-container">
+        <span class="material-symbols-outlined input-icon">lock</span>
+        <input
+          [type]="showPassword() ? 'text' : 'password'"
+          formControlName="password"
+          class="auth-input"
+          [class.invalid]="form.controls.password.touched && form.controls.password.invalid"
+          placeholder="Create Password"
+        />
+        <button type="button" class="password-toggle" (click)="togglePassword()">
+          <span class="material-symbols-outlined">
+            {{ showPassword() ? 'visibility_off' : 'visibility' }}
+          </span>
+        </button>
+      </div>
+      <span class="inline-error" *ngIf="form.controls.password.touched && form.controls.password.invalid">
+        {{ form.controls.password.errors?.['required'] ? 'A secure password is required' : 'Password must be at least 8 characters' }}
+      </span>
+
+      <!-- Password Strength -->
+      <div class="strength-meter" *ngIf="form.controls.password.value">
+        <div
+          class="strength-bar"
+          [style.width.%]="passwordStrength()"
+          [ngClass]="{
+            weak: passwordStrength() <= 25,
+            fair: passwordStrength() === 50,
+            good: passwordStrength() === 75,
+            strong: passwordStrength() === 100,
+          }"
+        ></div>
+        <span class="strength-label">
+          {{
+            passwordStrength() <= 25
+              ? 'Weak'
+              : passwordStrength() === 50
+                ? 'Fair'
+                : passwordStrength() === 75
+                  ? 'Good'
+                  : 'Strong'
+          }}
+        </span>
+      </div>
+    </div>
+
+    <!-- Confirm Password -->
+    <div class="field">
+      <div class="input-container">
+        <span class="material-symbols-outlined input-icon">lock_reset</span>
+        <input
+          type="password"
+          formControlName="confirmPassword"
+          class="auth-input"
+          [class.invalid]="form.controls.confirmPassword.touched && (form.controls.confirmPassword.invalid || form.errors?.['passwordMismatch'])"
+          placeholder="Confirm Password"
+        />
+      </div>
+      <span
+        class="inline-error"
+        *ngIf="form.errors?.['passwordMismatch'] && form.controls.confirmPassword.touched"
+      >
+        Passwords do not match
+      </span>
+    </div>
+
+    <!-- Submit Button -->
+    <button class="btn-auth" type="submit" [disabled]="isSubmitting()">
+      <span *ngIf="!isSubmitting()">Get Started for Free</span>
+      <div *ngIf="isSubmitting()" class="loader-white"></div>
+    </button>
+  </form>
+
+  <div class="auth-footer">
+    Already have an account?
+    <a routerLink="/auth/login">Log in here</a>
   </div>
 </div>

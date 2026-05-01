@@ -25,6 +25,18 @@ export class Signup {
 
   isSubmitting = signal(false);
   serverError = signal<string | null>(null);
+  showPassword = signal(false);
+
+  passwordStrength = computed(() => {
+    const pwd = this.form.controls.password.value;
+    if (!pwd) return 0;
+    let strength = 0;
+    if (pwd.length >= 8) strength += 25;
+    if (/[A-Z]/.test(pwd)) strength += 25;
+    if (/[0-9]/.test(pwd)) strength += 25;
+    if (/[^A-Za-z0-9]/.test(pwd)) strength += 25;
+    return strength;
+  });
 
   returnUrl = computed(() => this.route.snapshot.queryParamMap.get('returnUrl'));
 
@@ -33,11 +45,15 @@ export class Signup {
       name: ['', [Validators.required, Validators.minLength(2)]],
       email: ['', [Validators.required, Validators.email]],
       clinicName: ['', [Validators.required, Validators.minLength(2)]],
-      password: ['', [Validators.required, Validators.minLength(6)]],
-      confirmPassword: ['', [Validators.required, Validators.minLength(6)]],
+      password: ['', [Validators.required, Validators.minLength(8)]],
+      confirmPassword: ['', [Validators.required, Validators.minLength(8)]],
     },
     { validators: [passwordsMatchValidator] }
   );
+
+  togglePassword() {
+    this.showPassword.update(v => !v);
+  }
 
   submit() {
     if (this.form.invalid) {

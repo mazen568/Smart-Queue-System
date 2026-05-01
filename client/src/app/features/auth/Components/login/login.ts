@@ -19,13 +19,24 @@ export class Login {
 
   isSubmitting = signal(false);
   serverError = signal<string | null>(null);
+  showPassword = signal(false);
+  rememberMe = signal(false);
 
   returnUrl = computed(() => this.route.snapshot.queryParamMap.get('returnUrl'));
 
   form = this.fb.nonNullable.group({
-    email: ['', [Validators.required, Validators.email]],
-    password: ['', [Validators.required, Validators.minLength(6)]],
+    email: [this.getSavedEmail(), [Validators.required, Validators.email]],
+    password: ['', [Validators.required, Validators.minLength(8)]],
+    remember: [this.getSavedEmail() !== ''],
   });
+
+  private getSavedEmail(): string {
+    return localStorage.getItem('rememberedEmail') || '';
+  }
+
+  togglePassword() {
+    this.showPassword.update(v => !v);
+  }
 
   submit() {
     if (this.form.invalid) {
@@ -38,13 +49,18 @@ export class Login {
 
     this.auth.login(this.form.getRawValue()).subscribe({
       next: (res: UserDTO) => {
+        if (this.form.controls.remember.value) {
+          localStorage.setItem('rememberedEmail', this.form.controls.email.value);
+        } else {
+          localStorage.removeItem('rememberedEmail');
+        }
         const redirect = this.returnUrl() || this.defaultDashboardForRole(res.user.role);
         this.router.navigateByUrl(redirect, { replaceUrl: true });
       },
       error: (err) => {
         const message =
-          err?.error?.message ||
-          err?.message ||
+          // err?.error?.message ||
+          // err?.message ||
           'Login failed. Please check your credentials and try again.';
         this.serverError.set(message);
         this.isSubmitting.set(false);

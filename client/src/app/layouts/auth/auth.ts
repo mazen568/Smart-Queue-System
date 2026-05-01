@@ -1,10 +1,16 @@
-import { Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { Component, inject } from '@angular/core';
+import { Router, RouterOutlet } from '@angular/router';
 
 @Component({
   selector: 'app-auth',
   imports: [RouterOutlet],
   templateUrl: './auth.html',
-  styles: ``,
+  styleUrl: './auth.css',
 })
-export class Auth {}
+export class Auth {
+  router = inject(Router);
+
+  isRegisterPage(): boolean {
+    return this.router.url.includes('/register');
+  }
+}

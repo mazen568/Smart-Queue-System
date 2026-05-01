@@ -1,1 +1,35 @@
-<router-outlet></router-outlet>
+<div class="auth-layout" [class.auth-flipped]="isRegisterPage()">
+  <!-- Left: Auth Form Content -->
+  <main class="auth-content">
+    <div class="auth-content-container">
+      <!-- Desktop Branding -->
+      <div class="desktop-branding">
+        <div class="brand-logo-box">P</div>
+        <div class="brand-text-container">
+          <span class="brand-name">Pulse</span>
+          <span class="brand-tagline">Smart Queue System</span>
+        </div>
+      </div>
+
+      <div class="auth-card-wrapper">
+        <router-outlet></router-outlet>
+      </div>
+    </div>
+  </main>
+
+  <!-- Right: Branding & Illustration (Desktop Only) -->
+  <section class="auth-branding">
+    <div class="branding-illustration">
+      <img src="login2.png" alt="Pulse System" />
+    </div>
+
+    <div class="branding-content">
+      <h1>Smarter Queues. Happier Patients.</h1>
+      <p>
+        Real-time queue management system that helps clinics streamline operations and improve
+        patient experience.
+      </p>
+
+    </div>
+  </section>
+</div>

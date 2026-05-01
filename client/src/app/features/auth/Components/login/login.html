@@ -1,37 +1,97 @@
-<div class="auth-page">
-  <div class="auth-card surface shadow-zone fade-in-up">
-    <div class="auth-header">
-      <h2 style="margin: 0;">Welcome back</h2>
-      <p class="caption" style="margin: 6px 0 0;">Sign in to continue.</p>
+<div class="auth-card">
+  <div class="auth-header">
+    <h2 class="welcome-title">Welcome back!</h2>
+    <h1 class="main-title">Log in to your <span class="accent-text">account</span></h1>
+    <p class="subtitle">Access your dashboard and manage your clinic efficiently.</p>
+  </div>
+
+  <!-- Social Logins -->
+  <div class="social-grid">
+    <button type="button" class="social-btn">
+      <img src="https://www.google.com/favicon.ico" alt="Google" />
+      <span>Continue with Google</span>
+    </button>
+    <button type="button" class="social-btn">
+      <img src="https://www.facebook.com/favicon.ico" alt="Facebook" />
+      <span>Continue with Facebook</span>
+    </button>
+  </div>
+
+  <div class="form-divider">
+    <span>or continue with email</span>
+  </div>
+
+  <!-- Error Banner -->
+  <div class="error-banner" *ngIf="serverError()">
+    <div class="error-icon">
+      <span class="material-symbols-outlined">error</span>
+    </div>
+    <div class="error-content">
+      <span class="error-title">Login Failed</span>
+      <span class="error-message">{{ serverError() }}</span>
+    </div>
+  </div>
+
+  <form [formGroup]="form" (ngSubmit)="submit()" class="auth-form">
+    <!-- Email Field -->
+    <div class="field">
+      <div class="input-container">
+        <span class="material-symbols-outlined input-icon">mail</span>
+        <input
+          id="email"
+          type="email"
+          formControlName="email"
+          class="auth-input"
+          [class.invalid]="form.controls.email.touched && form.controls.email.invalid"
+          placeholder="Email address"
+        />
+      </div>
+      <span class="inline-error" *ngIf="form.controls.email.touched && form.controls.email.invalid">
+        {{ form.controls.email.errors?.['required'] ? 'Email is required' : 'Please enter a valid email' }}
+      </span>
     </div>
 
-    <form class="auth-form" [formGroup]="form" (ngSubmit)="submit()">
-      <div class="field">
-        <label class="caption" for="email">Email</label>
-        <input id="email" type="email" formControlName="email" placeholder="name@example.com" />
-        <p class="caption error" *ngIf="form.controls.email.touched && form.controls.email.invalid">
-          Please enter a valid email.
-        </p>
+    <!-- Password Field -->
+    <div class="field">
+      <div class="input-container">
+        <span class="material-symbols-outlined input-icon">lock</span>
+        <input
+          id="password"
+          [type]="showPassword() ? 'text' : 'password'"
+          formControlName="password"
+          class="auth-input"
+          [class.invalid]="form.controls.password.touched && form.controls.password.invalid"
+          placeholder="Password"
+        />
+        <button type="button" class="password-toggle" (click)="togglePassword()">
+          <span class="material-symbols-outlined">
+            {{ showPassword() ? 'visibility' : 'visibility_off' }}
+          </span>
+        </button>
       </div>
-
-      <div class="field">
-        <label class="caption" for="password">Password</label>
-        <input id="password" type="password" formControlName="password" placeholder="••••••••" />
-        <p class="caption error" *ngIf="form.controls.password.touched && form.controls.password.invalid">
-          Password must be at least 8 characters.
-        </p>
-      </div>
-
-      <p class="caption error" *ngIf="serverError()">{{ serverError() }}</p>
-
-      <button class="btn btn-primary" type="submit" [disabled]="isSubmitting()">
-        {{ isSubmitting() ? 'Signing in…' : 'Sign in' }}
-      </button>
-    </form>
-
-    <div class="auth-footer caption">
-      Don’t have an account?
-      <a routerLink="/auth/register">Create one</a>
+      <span class="inline-error" *ngIf="form.controls.password.touched && form.controls.password.invalid">
+        Password is required
+      </span>
     </div>
+
+    <!-- Options -->
+    <div class="form-options">
+      <label class="remember-me">
+        <input type="checkbox" formControlName="remember" />
+        <span>Remember me</span>
+      </label>
+      <a class="forgot-link">Forgot password?</a>
+    </div>
+
+    <!-- Submit Button -->
+    <button class="btn-auth" type="submit" [disabled]="isSubmitting()">
+      <span *ngIf="!isSubmitting()">Log in</span>
+      <div *ngIf="isSubmitting()" class="loader-white"></div>
+    </button>
+  </form>
+
+  <div class="auth-footer">
+    Don't have an account?
+    <a routerLink="/auth/register">Create an account</a>
   </div>
 </div>
