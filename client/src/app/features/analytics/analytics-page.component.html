@@ -1,0 +1,13 @@
+<div class="analytics-container">
+    <div class="header">
+        <h1>Queue Analytics Dashboard</h1>
+    </div>
+
+    <app-date-range-picker (dateRangeChange)="onDateRangeChange($event)"></app-date-range-picker>
+    <app-overview-stats></app-overview-stats>
+
+    <div class="charts-grid">
+        <app-daily-tickets-chart [dateRange]="dateRange()"></app-daily-tickets-chart>
+        <app-peak-hours-chart [dateRange]="dateRange()"></app-peak-hours-chart>
+    </div>
+</div>

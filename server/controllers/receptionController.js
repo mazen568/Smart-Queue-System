@@ -1,5 +1,6 @@
 import * as receptionService from "../services/receptionService.js";
 import Ticket from "../models/ticketModel.js";
+import { emitTicketCalled } from "../config/socket.config.js";
 
 // ─── READ ─────────────────────────────────────────────────────────
 
@@ -45,11 +46,17 @@ export const getStats = async (req, res) => {
 // ─── WRITE ────────────────────────────────────────────────────────
 
 // POST /reception/queues/:queueId/call-next
+
+// POST /reception/queues/:queueId/call-next
 export const callNext = async (req, res) => {
   const data = await receptionService.callNextTicket(
     req.user.clinicId,
     req.params.queueId,
   );
+
+  if (data.ticket) {
+    await emitTicketCalled(req.user.clinicId, data.ticket);
+  }
 
   res.status(200).json({
     success: true,
@@ -59,12 +66,17 @@ export const callNext = async (req, res) => {
 };
 
 // PATCH /reception/tickets/:id/call
+// PATCH /reception/tickets/:id/call
 export const callSpecific = async (req, res) => {
   const data = await receptionService.callSpecificTicket(
     req.user.clinicId,
     req.body.queueId,
     req.params.id,
   );
+
+  if (data.ticket) {
+    await emitTicketCalled(req.user.clinicId, data.ticket);
+  }
 
   res.status(200).json({
     success: true,

@@ -10,6 +10,7 @@ import {
 } from "../controllers/patientController.js";
 import { validateZodBody, validateZodParams } from "../middlewares/zodValidationMiddleware.js";
 import { takeTicketSchema, idParamSchema } from "../validations/patientValidations.js";
+import { requireCredits } from "../middlewares/requireCredits.js";
 
 const router = express.Router();
 
@@ -22,7 +23,7 @@ router.get("/queues", listQueues); // ?clinicId=...
 router.get("/queues/:id", validateZodParams(idParamSchema), getQueue);
 
 // Tickets (public)
-router.post("/tickets", validateZodBody(takeTicketSchema), takeTicket);
+router.post("/tickets", validateZodBody(takeTicketSchema), requireCredits, takeTicket);
 router.get("/tickets/:id", validateZodParams(idParamSchema), getMyTicketStatus);
 router.get("/tickets/queue/:queueId", listWaitingTicketsForQueue);
 

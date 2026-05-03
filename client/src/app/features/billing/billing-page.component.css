@@ -1,0 +1,74 @@
+.billing-shell {
+  min-height: 100vh;
+  padding: 24px;
+  background: var(--background);
+}
+
+.hero {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 16px;
+  margin-bottom: 24px;
+  padding: 24px;
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--foreground);
+}
+
+h1 {
+  margin: 0 0 8px 0;
+  font-size: var(--h1-size);
+  font-weight: 600;
+}
+
+.hero p {
+  margin: 0;
+  color: var(--muted-foreground);
+}
+
+.balance-chip {
+  min-width: 160px;
+  padding: 14px 18px;
+  border-radius: var(--radius-md);
+  background: var(--surface-elevated);
+  border: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+.balance-chip span {
+  font-size: var(--caption-size);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--muted-foreground);
+}
+
+.balance-chip strong {
+  font-size: 24px;
+  line-height: 1;
+  color: var(--accent);
+}
+
+.billing-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+@media (min-width: 1100px) {
+  .billing-grid {
+    grid-template-columns: 0.8fr 1.2fr;
+    align-items: start;
+  }
+}
+
+app-credit-balance,
+app-purchase-credits,
+app-payment-history {
+  display: block;
+}

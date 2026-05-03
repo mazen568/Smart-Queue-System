@@ -1,0 +1,9 @@
+<mat-card class="credit-balance-card">
+    <mat-card-content>
+        <div class="balance-container">
+            <div class="balance-label">Available Credits</div>
+            <div class="balance-amount" *ngIf="!loading">{{ balance }}</div>
+            <mat-spinner *ngIf="loading" diameter="40"></mat-spinner>
+        </div>
+    </mat-card-content>
+</mat-card>

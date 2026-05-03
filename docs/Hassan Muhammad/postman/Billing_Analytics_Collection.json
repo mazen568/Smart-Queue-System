@@ -1,0 +1,133 @@
+{
+    "info": {
+        "name": "Smart Queue — Billing & Analytics API (Hassan Muhammad)",
+        "description": "Complete test collection for Billing (Credits) and Analytics features.\n\n**How to use:**\n1. Run '1. Login' first to get a JWT token and clinicId.\n2. Run 'Get Credit Balance' to see current clinic credits.\n3. Run 'Get Available Packages' to see credit options.\n4. Run 'Create Checkout Session' to initiate a payment.\n5. Mock checkout in dev mode, or complete real Stripe payment.\n\n**Variables are auto-set by the Login script.**",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "variable": [
+        { "key": "baseUrl", "value": "http://localhost:3000/api/v1" },
+        { "key": "accessToken", "value": "" },
+        { "key": "clinicId", "value": "" }
+    ],
+    "auth": {
+        "type": "bearer",
+        "bearer": [{ "key": "token", "value": "{{accessToken}}", "type": "string" }]
+    },
+    "item": [{
+            "name": "Authentication",
+            "item": [{
+                "name": "1. Login (Admin/Clinic)",
+                "event": [{
+                    "listen": "test",
+                    "script": {
+                        "exec": [
+                            "const res = pm.response.json();",
+                            "if (res.user && res.user.accessToken) {",
+                            "    pm.collectionVariables.set('accessToken', res.user.accessToken);",
+                            "    if (res.user.clinicId) pm.collectionVariables.set('clinicId', res.user.clinicId);",
+                            "    console.log('✅ Token saved. ClinicId:', res.user.clinicId);",
+                            "}",
+                            "pm.test('Login successful', () => pm.response.to.have.status(200));"
+                        ],
+                        "type": "text/javascript"
+                    }
+                }],
+                "request": {
+                    "method": "POST",
+                    "url": "{{baseUrl}}/auth/login",
+                    "header": [{ "key": "Content-Type", "value": "application/json" }],
+                    "body": {
+                        "mode": "raw",
+                        "raw": "{\n  \"email\": \"admin@clinic.com\",\n  \"password\": \"password123\"\n}"
+                    },
+                    "description": "⚠️ Replace with valid admin/clinic credentials to get accessToken."
+                }
+            }]
+        },
+        {
+            "name": "Billing — Credits",
+            "item": [{
+                    "name": "Get Credit Balance",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{baseUrl}}/credits/balance",
+                        "header": [],
+                        "description": "Retrieve the current clinic credit balance.\n\n**Response:**\n```json\n{\n  \"balance\": 500\n}\n```"
+                    }
+                },
+                {
+                    "name": "Get Available Packages",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{baseUrl}}/payments/packages",
+                        "header": [],
+                        "description": "Retrieve all available credit packages (no auth required).\n\n**Response:**\n```json\n[\n  { \"credits\": 50, \"price\": 99 },\n  { \"credits\": 100, \"price\": 189 },\n  { \"credits\": 200, \"price\": 349 }\n]\n```"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Billing — Payments",
+            "item": [{
+                    "name": "Create Checkout Session",
+                    "event": [{
+                        "listen": "test",
+                        "script": {
+                            "exec": [
+                                "const res = pm.response.json();",
+                                "if (res.sessionId) pm.collectionVariables.set('sessionId', res.sessionId);",
+                                "pm.test('Checkout session created', () => pm.response.to.have.status(200));"
+                            ],
+                            "type": "text/javascript"
+                        }
+                    }],
+                    "request": {
+                        "method": "POST",
+                        "url": "{{baseUrl}}/payments/checkout",
+                        "header": [{ "key": "Content-Type", "value": "application/json" }],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"credits\": 50\n}"
+                        },
+                        "description": "Create a Stripe checkout session for credit purchase.\n\n**Request Body:**\n- `credits` (number): One of 50, 100, or 200\n\n**Response:**\n```json\n{\n  \"sessionId\": \"cs_test_...\",\n  \"checkoutUrl\": \"https://checkout.stripe.com/...\"\n}\n```\n\n**In Development:**\n- Use mock checkout mode (no real Stripe charge)\n- Manually trigger webhook event to apply credits"
+                    }
+                },
+                {
+                    "name": "Webhook: Payment Success (Test)",
+                    "request": {
+                        "method": "POST",
+                        "url": "{{baseUrl}}/webhooks/stripe",
+                        "header": [{ "key": "Content-Type", "value": "application/json" }],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"type\": \"payment_intent.succeeded\",\n  \"data\": {\n    \"object\": {\n      \"id\": \"pi_test_123\",\n      \"metadata\": {\n        \"clinicId\": \"{{clinicId}}\",\n        \"credits\": 50\n      }\n    }\n  }\n}"
+                        },
+                        "description": "⚠️ **Test Only** — Simulates Stripe webhook event to apply credits to clinic balance.\n\nIn production, Stripe sends this automatically. For development, manually POST this to test the payment flow.\n\n**Effect:**\n- Increments clinic balance by 50 credits\n- Creates payment transaction record\n- Broadcasts socket event for real-time update"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Analytics — Metrics",
+            "item": [{
+                    "name": "Get Overview Stats",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{baseUrl}}/analytics/overview",
+                        "header": [],
+                        "description": "Retrieve high-level clinic performance metrics.\n\n**Response:**\n```json\n{\n  \"totalServed\": 142,\n  \"avgServiceTime\": 8.5,\n  \"currentQueueDepth\": 12,\n  \"peakHour\": 14\n}\n```"
+                    }
+                },
+                {
+                    "name": "Get Analytics Metrics (with Date Range)",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{baseUrl}}/analytics/metrics?from=2026-04-26&to=2026-05-03",
+                        "header": [],
+                        "description": "Retrieve detailed analytics for a date range.\n\n**Query Parameters:**\n- `from` (string): Start date (YYYY-MM-DD)\n- `to` (string): End date (YYYY-MM-DD)\n\n**Response:**\n```json\n{\n  \"dailyStats\": [\n    { \"date\": \"2026-04-26\", \"ticketsServed\": 18, \"avgServiceTime\": 8.2 },\n    { \"date\": \"2026-04-27\", \"ticketsServed\": 22, \"avgServiceTime\": 9.1 }\n  ],\n  \"hourlyStats\": [\n    { \"hour\": 8, \"ticketsServed\": 3 },\n    { \"hour\": 9, \"ticketsServed\": 8 },\n    { \"hour\": 14, \"ticketsServed\": 12 }\n  ],\n  \"overview\": {\n    \"totalServed\": 142,\n    \"avgServiceTime\": 8.7\n  }\n}\n```"
+                    }
+                }
+            ]
+        }
+    ]
+}

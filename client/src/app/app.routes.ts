@@ -105,7 +105,17 @@ export const routes: Routes = [
         path: "activity",
         loadComponent: () => import("./features/admin/Components/activity/activity").then(c => c.ActivityComponent),
         title: "Activity Log"
-      }
+      },
+        {
+          path: "billing",
+          loadComponent: () => import("./features/billing/billing-page.component").then(c => c.BillingPageComponent),
+          title: "Billing & Credits"
+        },
+        {
+          path: "analytics",
+          loadComponent: () => import("./features/analytics/analytics-page.component").then(c => c.AnalyticsPageComponent),
+          title: "Queue Analytics"
+        },
     ]
   },
   {

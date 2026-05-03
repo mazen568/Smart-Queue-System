@@ -1,0 +1,16 @@
+<mat-card class="purchase-card">
+    <mat-card-header>
+        <mat-card-title>Choose Credit Package</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+        <div class="packages-grid">
+            <app-credit-package-card *ngFor="let pkg of packages" [credits]="pkg.credits" [price]="pkg.price" [isSelected]="selectedCredits === pkg.credits" (selected)="selectPackage($event)"></app-credit-package-card>
+        </div>
+    </mat-card-content>
+    <mat-card-actions class="card-actions">
+        <button [class.pay-btn]="selectedCredits" [class.disabled]="!selectedCredits || isLoading()" color="primary" [disabled]="!selectedCredits || isLoading()" (click)="checkout()">
+      <span *ngIf="!isLoading()">Proceed to Payment</span>
+      <mat-spinner *ngIf="isLoading()" diameter="20"></mat-spinner>
+    </button>
+    </mat-card-actions>
+</mat-card>

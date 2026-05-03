@@ -6,15 +6,8 @@ import QRCode from 'qrcode';
   selector: 'app-qr-code',
   standalone: true,
   imports: [CommonModule],
-  template: `<canvas #canvas class="qr"></canvas>`,
-  styles: [
-    `
-      .qr {
-        width: 160px;
-        height: 160px;
-      }
-    `,
-  ],
+  templateUrl: './qr-code.html',
+  styleUrls: ['./qr-code.css'],
 })
 export class QrCodeComponent implements OnChanges {
   @Input() value = '';

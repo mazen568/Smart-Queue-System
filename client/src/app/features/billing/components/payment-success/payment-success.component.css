@@ -1,0 +1,38 @@
+.success-dialog {
+  padding: 24px;
+  max-width: 420px;
+}
+
+h2 {
+  color: var(--foreground);
+  margin: 0 0 16px 0;
+  font-size: var(--h2-size);
+}
+
+p {
+  color: var(--muted-foreground);
+  margin: 0 0 12px 0;
+  font-size: var(--body-size);
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 24px;
+  gap: 8px;
+}
+
+button {
+  background: var(--accent);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s var(--ease-out-soft);
+}
+
+button:hover {
+  background: var(--accent-hover);
+}

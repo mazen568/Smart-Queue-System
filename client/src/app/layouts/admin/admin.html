@@ -30,9 +30,13 @@
                 <span class="material-symbols-outlined nav-icon">history</span>
                 <span>Activity Log</span>
             </a>
-            <a routerLink="/admin/credits" routerLinkActive="active" class="nav-item" (click)="isSidebarOpen.set(false)">
+            <a routerLink="/admin/analytics" routerLinkActive="active" class="nav-item" (click)="isSidebarOpen.set(false)">
                 <span class="material-symbols-outlined nav-icon">info</span>
-                <span>Credits</span>
+                <span>Analytics</span>
+            </a>
+            <a routerLink="/admin/billing" routerLinkActive="active" class="nav-item" (click)="isSidebarOpen.set(false)">
+                <span class="material-symbols-outlined cash-icon">money</span>
+                <span>Billing</span>
             </a>
         </nav>
 
@@ -57,47 +61,45 @@
                 <div class="search-box">
                     <span class="material-symbols-outlined search-icon">search</span>
                     <input type="text" placeholder="Search queues, staff, patients..." [ngModel]="searchQuery()" (ngModelChange)="onSearch($event)">
-                    <span class="search-shortcut">⌘K</span>
-
-                    @if (searchResults()) {
-                        <div class="search-results surface shadow-lg">
-                            <div class="search-section" *ngIf="searchResults()?.queues?.length">
-                                <div class="section-title">QUEUES</div>
-                                <div class="result-item" *ngFor="let q of searchResults()?.queues" [routerLink]="['/admin/queues']" (click)="closeSearch()">
-                                    <span class="material-symbols-outlined">queue_music</span>
-                                    <div class="result-details">
-                                        <div class="result-name">{{ q.name }}</div>
-                                        <div class="result-meta">Number: {{ q.currentNumber }}</div>
-                                    </div>
+                    <span class="search-shortcut">⌘K</span> @if (searchResults()) {
+                    <div class="search-results surface shadow-lg">
+                        <div class="search-section" *ngIf="searchResults()?.queues?.length">
+                            <div class="section-title">QUEUES</div>
+                            <div class="result-item" *ngFor="let q of searchResults()?.queues" [routerLink]="['/admin/queues']" (click)="closeSearch()">
+                                <span class="material-symbols-outlined">queue_music</span>
+                                <div class="result-details">
+                                    <div class="result-name">{{ q.name }}</div>
+                                    <div class="result-meta">Number: {{ q.currentNumber }}</div>
                                 </div>
                             </div>
-
-                            <div class="search-section" *ngIf="searchResults()?.staff?.length">
-                                <div class="section-title">STAFF</div>
-                                <div class="result-item" *ngFor="let s of searchResults()?.staff" [routerLink]="['/admin/staff']" (click)="closeSearch()">
-                                    <span class="material-symbols-outlined">badge</span>
-                                    <div class="result-details">
-                                        <div class="result-name">{{ s.name }}</div>
-                                        <div class="result-meta">{{ s.email }}</div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="search-section" *ngIf="searchResults()?.patients?.length">
-                                <div class="section-title">PATIENTS</div>
-                                <div class="result-item" *ngFor="let p of searchResults()?.patients" (click)="closeSearch()">
-                                    <span class="material-symbols-outlined">person</span>
-                                    <div class="result-details">
-                                        <div class="result-name">P-{{ p.number }}</div>
-                                        <div class="result-meta">{{ p.queueName }} • {{ p.status | uppercase }}</div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            @if (!searchResults()?.queues?.length && !searchResults()?.staff?.length && !searchResults()?.patients?.length) {
-                                <div class="search-empty">No results found for "{{ searchQuery() }}"</div>
-                            }
                         </div>
+
+                        <div class="search-section" *ngIf="searchResults()?.staff?.length">
+                            <div class="section-title">STAFF</div>
+                            <div class="result-item" *ngFor="let s of searchResults()?.staff" [routerLink]="['/admin/staff']" (click)="closeSearch()">
+                                <span class="material-symbols-outlined">badge</span>
+                                <div class="result-details">
+                                    <div class="result-name">{{ s.name }}</div>
+                                    <div class="result-meta">{{ s.email }}</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="search-section" *ngIf="searchResults()?.patients?.length">
+                            <div class="section-title">PATIENTS</div>
+                            <div class="result-item" *ngFor="let p of searchResults()?.patients" (click)="closeSearch()">
+                                <span class="material-symbols-outlined">person</span>
+                                <div class="result-details">
+                                    <div class="result-name">P-{{ p.number }}</div>
+                                    <div class="result-meta">{{ p.queueName }} • {{ p.status | uppercase }}</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        @if (!searchResults()?.queues?.length && !searchResults()?.staff?.length && !searchResults()?.patients?.length) {
+                        <div class="search-empty">No results found for "{{ searchQuery() }}"</div>
+                        }
+                    </div>
                     }
                 </div>
                 <button class="icon-btn notification-btn">
@@ -110,7 +112,7 @@
             <router-outlet></router-outlet>
         </section>
     </main>
-    
+
     <!-- Global Toast Notifications Container (Mock) -->
     <div class="toast-container" style="position: fixed; bottom: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; pointer-events: none;">
         <!-- Toasts will be dynamically injected here -->

@@ -6,15 +6,8 @@ import { CommonModule } from '@angular/common';
   selector: 'app-join',
   standalone: true,
   imports: [CommonModule],
-  template: `<div class="join-wrap">Redirecting...</div>`,
-  styles: [
-    `
-      .join-wrap {
-        padding: 24px;
-        font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      }
-    `,
-  ],
+  templateUrl: './join.html',
+  styleUrls: ['./join.css'],
 })
 export class JoinComponent implements OnInit {
   constructor(private route: ActivatedRoute, private router: Router) {}

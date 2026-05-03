@@ -3,6 +3,7 @@ import Queue from "../models/queueModel.js";
 import Ticket from "../models/ticketModel.js";
 import * as ticketService from "../services/ticketService.js";
 import { getIO } from "../config/socket.config.js";
+import { addCredits, deductOneCredit } from "../services/creditsService.js";
 
 /**
  * Browsing clinics (Public)
@@ -88,11 +89,19 @@ export const takeTicket = async (req, res, next) => {
       });
     }
 
-    const ticketData = await ticketService.generateTicket({
-      clinicId,
-      queueId,
-      customerName,
-    });
+    await deductOneCredit(clinicId);
+
+    let ticketData;
+    try {
+      ticketData = await ticketService.generateTicket({
+        clinicId,
+        queueId,
+        customerName,
+      });
+    } catch (error) {
+      await addCredits(clinicId, 1);
+      throw error;
+    }
 
     const waitingCount = await Ticket.countDocuments({ queueId, status: "waiting" });
 
@@ -274,6 +283,33 @@ export const listWaitingTicketsForQueue = async (req, res, next) => {
     const { queueId } = req.params;
     const tickets = await ticketService.getWaitingTickets(queueId);
     res.status(200).json({ success: true, data: tickets });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Subscribe to Web Push notifications for a ticket
+ * POST /notifications/subscribe
+ */
+export const subscribeToNotifications = async (req, res, next) => {
+  try {
+    const { subscription, ticketId, clinicId } = req.body;
+
+    if (!subscription || !ticketId || !clinicId) {
+      return res.status(400).json({
+        success: false,
+        message: "subscription, ticketId, and clinicId are required",
+      });
+    }
+
+    const notificationService = await import("../services/notificationService.js");
+    await notificationService.subscribeToNotifications(clinicId, subscription, ticketId);
+
+    res.status(201).json({
+      success: true,
+      message: "Subscribed to notifications successfully",
+    });
   } catch (error) {
     next(error);
   }

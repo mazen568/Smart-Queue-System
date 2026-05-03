@@ -1,0 +1,26 @@
+<div class="billing-shell">
+    <mat-card *ngIf="successMessage()" color="primary" class="success-card">
+        <mat-card-content>
+            <strong>{{ successMessage() }}</strong>
+        </mat-card-content>
+    </mat-card>
+    <div class="hero">
+        <div>
+            <h1>Billing & Credits</h1>
+            <p>Top up your clinic balance, review payments, and keep the queue flowing.</p>
+        </div>
+        <div class="balance-chip" *ngIf="!loading()">
+            <span>Clinic Balance</span>
+            <strong>{{ balance() }}</strong>
+        </div>
+    </div>
+
+    <app-low-credit-warning [balance]="balance()"></app-low-credit-warning>
+
+    <div class="billing-grid">
+        <app-credit-balance></app-credit-balance>
+        <app-purchase-credits></app-purchase-credits>
+    </div>
+
+    <app-payment-history></app-payment-history>
+</div>

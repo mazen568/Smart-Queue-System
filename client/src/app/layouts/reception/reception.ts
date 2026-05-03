@@ -6,6 +6,6 @@ import { Header } from '../../shared/Components/header/header';
   selector: 'app-reception',
   imports: [RouterOutlet, Header],
   templateUrl: './reception.html',
-  styles: ``,
+  styleUrls: ['./reception.css'],
 })
 export class Reception {}

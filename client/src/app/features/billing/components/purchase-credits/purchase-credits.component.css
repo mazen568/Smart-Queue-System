@@ -1,0 +1,46 @@
+.purchase-card {
+  max-width: 900px;
+  margin: 0 auto;
+  border: 1px solid var(--border);
+  background: var(--surface);
+}
+
+mat-card-header {
+  background: var(--surface-elevated);
+  border-bottom: 1px solid var(--border);
+}
+
+.packages-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  padding: 24px;
+}
+
+.card-actions {
+  display: flex;
+  justify-content: center;
+  padding: 16px 24px;
+  border-top: 1px solid var(--border);
+}
+
+button {
+  min-width: 200px;
+}
+
+.pay-btn {
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  padding: 12px 24px;
+}
+
+.disabled {
+  background: var(--border);
+  color: var(--muted-foreground);
+  cursor: not-allowed;
+  border: none;
+  border-radius: var(--radius-md);
+  padding: 12px 24px;
+}

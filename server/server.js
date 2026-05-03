@@ -10,6 +10,9 @@ import adminRouter from "./routes/adminRoutes.js"
 import patientRouter from "./routes/patientRoutes.js"
 import publicRouter from "./routes/publicRoutes.js"
 import receptionRouter from "./routes/receptionRoutes.js"
+import creditsRouter from "./routes/creditsRoutes.js"
+import paymentRouter from "./routes/paymentRoutes.js"
+import webhookRouter from "./routes/webhookRoutes.js"
 import { initSocket } from "./config/socket.config.js"
 import cookieParser from "cookie-parser"
 import cors from "cors"
@@ -48,6 +51,9 @@ app.use(`${baseURL}`, publicRouter)
 //protected routes
 app.use(`${baseURL}/admin`, adminRouter)
 app.use(`${baseURL}/reception`, receptionRouter)
+app.use(`${baseURL}/credits`, creditsRouter)
+app.use(`${baseURL}/payments`, paymentRouter)
+app.use(`${baseURL}/webhooks`, webhookRouter)
 
 // Serve uploads statically
 const __filename = fileURLToPath(import.meta.url);

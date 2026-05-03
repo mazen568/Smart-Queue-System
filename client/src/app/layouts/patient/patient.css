@@ -1,0 +1,10 @@
+/* Patient layout styles */
+/* Add layout-specific rules here if needed */
+
+app-header {
+  display: block;
+}
+
+router-outlet {
+  display: block;
+}

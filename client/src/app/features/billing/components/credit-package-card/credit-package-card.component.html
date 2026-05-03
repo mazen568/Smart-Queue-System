@@ -1,0 +1,13 @@
+<div class="package-card" [class.active]="isSelected">
+    <div class="package-header">
+        <div class="package-title">{{ credits }} Credits</div>
+        <div *ngIf="isSelected" class="active-badge">Selected</div>
+    </div>
+    <div class="package-content">
+        <div class="package-price">{{ price }} EGP</div>
+        <div class="price-per-credit">{{ (pricePerCredit | number: '1.2-2') }} EGP/credit</div>
+    </div>
+    <button class="select-button" [class.selected]="isSelected" (click)="onSelect()">
+    {{ isSelected ? 'Selected' : 'Select Plan' }}
+  </button>
+</div>

@@ -1,0 +1,8 @@
+<div class="success-dialog">
+    <h2>Payment Successful</h2>
+    <p>{{ data.message }}</p>
+    <p *ngIf="data.session_id">Session: {{ data.session_id }}</p>
+    <div class="actions">
+        <button mat-raised-button color="primary" (click)="close()">OK</button>
+    </div>
+</div>

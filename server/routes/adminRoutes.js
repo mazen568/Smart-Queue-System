@@ -19,6 +19,12 @@ import {
   globalSearch,
 } from "../controllers/adminController.js";
 import authenticate from "../middlewares/authenticationMiddleware.js";
+import {
+  getOverviewStats as getAnalyticsOverview,
+  getDailyTickets,
+  getWaitTimePerQueue,
+  getPeakHours,
+} from "../controllers/analyticsController.js";
 import authorize from "../middlewares/authorizationMiddleware.js";
 import { isolateClinic } from "../middlewares/isolateClinicMiddleware.js";
 import { upload } from "../middlewares/multerMiddleware.js";
@@ -61,5 +67,10 @@ router.post("/tickets/:id/done", completeTicket);
 // Activity & Search
 router.get("/activity", getActivity);
 router.get("/search", globalSearch);
+// Analytics
+router.get("/analytics/overview", getAnalyticsOverview);
+router.get("/analytics/daily", getDailyTickets);
+router.get("/analytics/wait-time", getWaitTimePerQueue);
+router.get("/analytics/peak-hours", getPeakHours);
 
 export default router;

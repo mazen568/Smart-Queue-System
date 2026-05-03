@@ -6,6 +6,6 @@ import { Header } from '../../shared/Components/header/header';
   selector: 'app-patient',
   imports: [RouterOutlet,Header],
   templateUrl: './patient.html',
-  styles: ``,
+  styleUrls: ['./patient.css'],
 })
 export class Patient {}

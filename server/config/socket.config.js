@@ -45,3 +45,23 @@ export const getIO = () => {
   }
   return io;
 };
+export const emitTicketCalled = async (clinicId, ticket) => {
+  try {
+    const io = getIO();
+    io.to(`clinic:${clinicId}`).emit("ticketCalled", {
+      ticketId: ticket._id,
+      ticketNumber: ticket.number,
+      queueId: ticket.queueId,
+      calledAt: ticket.calledAt,
+    });
+
+    // Trigger web push notification
+    const notificationService = await import("../services/notificationService.js");
+    await notificationService.notifyTicketCalled(ticket._id, clinicId, {
+      number: ticket.number,
+      queueId: ticket.queueId,
+    });
+  } catch (error) {
+    console.error("Error emitting ticket called event:", error);
+  }
+};

@@ -1,4 +1,5 @@
 import mongoose from "mongoose"
+import Credits from "./creditsModel.js"
 
 const { Schema } = mongoose
 
@@ -29,6 +30,25 @@ const clinicSchema = new Schema({
 }, { timestamps: true })
 
 clinicSchema.index({ name: 1 });
+
+clinicSchema.post("save", async function () {
+    const session = this.$session?.() || null
+
+    await Credits.updateOne(
+        { clinicId: this._id },
+        {
+            $setOnInsert: {
+                clinicId: this._id,
+                balance: 0,
+                updatedAt: new Date(),
+            }
+        },
+        {
+            upsert: true,
+            ...(session ? { session } : {}),
+        }
+    )
+})
 
 const clinicModel = mongoose.model("Clinic", clinicSchema)
 

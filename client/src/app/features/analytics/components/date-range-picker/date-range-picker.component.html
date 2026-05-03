@@ -1,0 +1,21 @@
+<div class="date-range-container">
+    <div class="date-fields">
+        <mat-form-field appearance="outline">
+            <mat-label>From</mat-label>
+            <input matInput [matDatepicker]="fromPicker" [(ngModel)]="fromDate" (ngModelChange)="onDateChange()" />
+            <mat-datepicker-toggle matSuffix [for]="fromPicker"></mat-datepicker-toggle>
+            <mat-datepicker #fromPicker></mat-datepicker>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+            <mat-label>To</mat-label>
+            <input matInput [matDatepicker]="toPicker" [(ngModel)]="toDate" (ngModelChange)="onDateChange()" />
+            <mat-datepicker-toggle matSuffix [for]="toPicker"></mat-datepicker-toggle>
+            <mat-datepicker #toPicker></mat-datepicker>
+        </mat-form-field>
+    </div>
+
+    <button class="apply-button" (click)="onApply()">
+    <span>Apply Filter</span>
+  </button>
+</div>
