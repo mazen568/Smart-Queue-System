@@ -63,9 +63,10 @@ export class PatientService {
       // Client-side errors
       errorMessage = `Error: ${error.error.message}`;
     } else {
-      // Server-side errors
-      errorMessage = error.error?.message || `Error Code: ${error.status}\nMessage: ${error.message}`;
+      // Server-side errors: include status code explicitly for component handling
+      errorMessage = `STATUS_${error.status}: ${error.error?.message || error.message}`;
     }
     return throwError(() => new Error(errorMessage));
   }
+
 }

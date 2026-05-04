@@ -35,6 +35,8 @@ export class ClinicDetailComponent implements OnInit, OnDestroy {
   selectedQueue: Queue | null = null;
   customerName = '';
   booking = false;
+  bookingError: string | null = null;
+
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
@@ -102,7 +104,9 @@ export class ClinicDetailComponent implements OnInit, OnDestroy {
     if (this.booking) return;
     this.dialogOpen = false;
     this.selectedQueue = null;
+    this.bookingError = null;
     this.cdr.detectChanges();
+
   }
 
   confirmTakeTicket(): void {
@@ -110,8 +114,10 @@ export class ClinicDetailComponent implements OnInit, OnDestroy {
     this.booking = true;
     this.cdr.detectChanges();
 
+    this.bookingError = null;
     this.patientService
       .takeTicket(this.clinic._id, this.selectedQueue._id, this.customerName?.trim() || undefined)
+
       .subscribe({
         next: (data: any) => {
           try {
@@ -122,10 +128,18 @@ export class ClinicDetailComponent implements OnInit, OnDestroy {
           this.cdr.detectChanges();
           this.router.navigate(['/patient/ticket', data.ticket._id], { queryParams: { mode: 'confirm' } });
         },
-        error: () => {
+        error: (err) => {
           this.booking = false;
+          // Check for payment required error using the new status prefix
+          if (err.message?.includes('STATUS_402')) {
+            this.bookingError = 'This clinic is currently unable to accept new tickets. Please try again later or contact the clinic.';
+          } else {
+            this.bookingError = 'Something went wrong. Please try again.';
+          }
           this.cdr.detectChanges();
         },
+
+
       });
   }
 

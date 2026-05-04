@@ -86,9 +86,12 @@
       <div class="label">Clinic</div>
       <div class="value">{{ clinic?.name }}</div>
     </div>
-    <div class="row">
-      <div class="label">Queue</div>
-      <div class="value">{{ selectedQueue?.name }}</div>
+    <div class="take-ticket-form">
+      <div class="error-alert" *ngIf="bookingError">
+        <span class="material-symbols-outlined">warning</span>
+        <p>{{ bookingError }}</p>
+      </div>
+      <p class="form-desc" *ngIf="!bookingError">Please enter your name to join the <strong>{{ selectedQueue?.name }}</strong> queue.</p>
     </div>
 
     <div class="field">
