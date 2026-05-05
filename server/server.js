@@ -1,7 +1,9 @@
-// Fix: Windows DNS resolver blocks SRV queries needed by MongoDB Atlas
-// Must be set before any imports that trigger DNS lookups
-import { setServers } from "dns";
-setServers(["8.8.8.8", "8.8.4.4"]);
+// Fix: Windows DNS resolver sometimes blocks SRV queries needed by MongoDB Atlas.
+// We override to Google DNS only on Windows to avoid breaking Mac/Linux teammates.
+if (process.platform === "win32") {
+  const { setServers } = await import("dns");
+  setServers(["8.8.8.8", "8.8.4.4"]);
+}
 
 import express from "express"
 import mongoose from "mongoose"
