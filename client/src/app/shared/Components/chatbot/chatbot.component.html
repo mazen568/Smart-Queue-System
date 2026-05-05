@@ -1,0 +1,114 @@
+<!-- Floating Toggle Button -->
+<button
+  id="chatbot-toggle-btn"
+  class="chatbot-fab"
+  (click)="toggleChat()"
+  [attr.aria-label]="isOpen() ? 'Close chat' : 'Open SmartBot chat'"
+  [class.open]="isOpen()"
+>
+  <span class="fab-icon fab-icon--chat">
+    <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+    </svg>
+  </span>
+  <span class="fab-icon fab-icon--close">
+    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+    </svg>
+  </span>
+</button>
+
+<!-- Chat Window -->
+<div class="chatbot-window" [class.chatbot-window--open]="isOpen()" role="dialog" aria-label="SmartBot chat window">
+
+  <!-- Header -->
+  <div class="chatbot-header">
+    <div class="chatbot-header__avatar">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1H2a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h1a7 7 0 0 1 7-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 0 1 2-2z"/>
+        <circle cx="9" cy="14" r="1" fill="currentColor"/><circle cx="15" cy="14" r="1" fill="currentColor"/>
+      </svg>
+    </div>
+    <div class="chatbot-header__info">
+      <span class="chatbot-header__name">SmartBot</span>
+      <span class="chatbot-header__status">
+        <span class="status-dot"></span> Online
+      </span>
+    </div>
+    <button class="chatbot-header__close" (click)="toggleChat()" aria-label="Close chat">
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+    </button>
+  </div>
+
+  <!-- Messages -->
+  <div class="chatbot-messages" #messagesContainer>
+    @for (msg of messages(); track $index) {
+      <div class="chatbot-message" [class.chatbot-message--user]="msg.role === 'user'" [class.chatbot-message--bot]="msg.role === 'assistant'">
+        @if (msg.role === 'assistant') {
+          <div class="message-avatar">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1H2a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h1a7 7 0 0 1 7-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 0 1 2-2z"/>
+              <circle cx="9" cy="14" r="1" fill="currentColor"/><circle cx="15" cy="14" r="1" fill="currentColor"/>
+            </svg>
+          </div>
+        }
+        <div class="message-bubble">{{ msg.content }}</div>
+      </div>
+    }
+
+    <!-- Loading indicator -->
+    @if (isLoading()) {
+      <div class="chatbot-message chatbot-message--bot">
+        <div class="message-avatar">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1H2a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h1a7 7 0 0 1 7-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 0 1 2-2z"/>
+            <circle cx="9" cy="14" r="1" fill="currentColor"/><circle cx="15" cy="14" r="1" fill="currentColor"/>
+          </svg>
+        </div>
+        <div class="message-bubble message-bubble--typing">
+          <span class="typing-dot"></span>
+          <span class="typing-dot"></span>
+          <span class="typing-dot"></span>
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- Quick Suggestions -->
+  @if (messages().length <= 1 && !isLoading()) {
+    <div class="chatbot-suggestions">
+      <button class="suggestion-chip" id="suggestion-ticket" (click)="setInput('What is my queue position?')">🎫 Queue position</button>
+      <button class="suggestion-chip" id="suggestion-clinics" (click)="setInput('Show me available clinics')">🏥 View clinics</button>
+      <button class="suggestion-chip" id="suggestion-cancel" (click)="setInput('I want to cancel my ticket')">❌ Cancel ticket</button>
+      <button class="suggestion-chip" id="suggestion-wait" (click)="setInput('How long is the wait time?')">⏱️ Wait time</button>
+    </div>
+  }
+
+  <!-- Input Area -->
+  <div class="chatbot-input-area">
+    <textarea
+      id="chatbot-input"
+      class="chatbot-input"
+      [value]="userInput()"
+      (input)="setInput($any($event.target).value)"
+      (keydown)="onKeyDown($event)"
+      placeholder="Type a message..."
+      rows="1"
+      [disabled]="isLoading()"
+      aria-label="Chat message input"
+    ></textarea>
+    <button
+      id="chatbot-send-btn"
+      class="chatbot-send-btn"
+      (click)="sendMessage()"
+      [disabled]="!userInput().trim() || isLoading()"
+      aria-label="Send message"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+      </svg>
+    </button>
+  </div>
+</div>

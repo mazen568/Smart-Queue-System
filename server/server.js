@@ -1,3 +1,8 @@
+// Fix: Windows DNS resolver blocks SRV queries needed by MongoDB Atlas
+// Must be set before any imports that trigger DNS lookups
+import { setServers } from "dns";
+setServers(["8.8.8.8", "8.8.4.4"]);
+
 import express from "express"
 import mongoose from "mongoose"
 import dotenv from "dotenv"
@@ -13,6 +18,7 @@ import receptionRouter from "./routes/receptionRoutes.js"
 import creditsRouter from "./routes/creditsRoutes.js"
 import paymentRouter from "./routes/paymentRoutes.js"
 import webhookRouter from "./routes/webhookRoutes.js"
+import chatbotRouter from "./routes/chatbotRoutes.js"
 import { initSocket } from "./config/socket.config.js"
 import cookieParser from "cookie-parser"
 import cors from "cors"
@@ -54,6 +60,7 @@ app.use(`${baseURL}/reception`, receptionRouter)
 app.use(`${baseURL}/credits`, creditsRouter)
 app.use(`${baseURL}/payments`, paymentRouter)
 app.use(`${baseURL}/webhooks`, webhookRouter)
+app.use(`${baseURL}/chatbot`, chatbotRouter)
 
 // Serve uploads statically
 const __filename = fileURLToPath(import.meta.url);
