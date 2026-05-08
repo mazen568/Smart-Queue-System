@@ -4,6 +4,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth-service';
 import { UserDTO } from '../../../../types/auth.dto';
+import { ToastService } from '../../../../shared/services/toast.service';
 
 @Component({
   selector: 'app-login',
@@ -16,6 +17,7 @@ export class Login {
   private auth = inject(AuthService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
+  private toast = inject(ToastService);
 
   isSubmitting = signal(false);
   serverError = signal<string | null>(null);
@@ -51,8 +53,10 @@ export class Login {
       next: (res: UserDTO) => {
         if (this.form.controls.remember.value) {
           localStorage.setItem('rememberedEmail', this.form.controls.email.value);
+          this.toast.success('Login successful');
         } else {
           localStorage.removeItem('rememberedEmail');
+          this.toast.success('Login successful');
         }
         const redirect = this.returnUrl() || this.defaultDashboardForRole(res.user.role);
         this.router.navigateByUrl(redirect, { replaceUrl: true });
@@ -64,6 +68,7 @@ export class Login {
           'Login failed. Please check your credentials and try again.';
         this.serverError.set(message);
         this.isSubmitting.set(false);
+        this.toast.error('Login failed. Please check your credentials and try again.');
       },
       complete: () => this.isSubmitting.set(false),
     });

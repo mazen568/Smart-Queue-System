@@ -10,6 +10,7 @@ import {
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth-service';
 import { UserDTO } from '../../../../types/auth.dto';
+import { ToastService } from '../../../../shared/services/toast.service';
 
 @Component({
   selector: 'app-signup',
@@ -22,6 +23,7 @@ export class Signup {
   private auth = inject(AuthService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
+  private toast = inject(ToastService);
 
   isSubmitting = signal(false);
   serverError = signal<string | null>(null);
@@ -68,6 +70,7 @@ export class Signup {
       next: (res:UserDTO) => {
         const redirect = this.defaultDashboardForRole(res.user.role);
         this.router.navigateByUrl(redirect, { replaceUrl: true });
+        this.toast.success('Registration successful');
       },
       error: (err) => {
         const message =
