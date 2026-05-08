@@ -12,6 +12,11 @@
 
 ---
 
+## 🚀 Demo 
+[Watch the Features Walkthrough](https://www.linkedin.com/feed/update/urn:li:activity:7458590040777031681/?utm_source=share&utm_medium=member_desktop&rcm=ACoAAE1aXNUB2CqA0P8kKo76E-AOA7XuLXK67Pw)
+
+---
+
 ## 🌟 Overview
 
 Smart Queue System is a full-stack multi-tenant SaaS solution for modern medical clinics. It replaces paper tickets with a digital-first approach:
