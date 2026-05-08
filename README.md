@@ -141,7 +141,7 @@ Smart Queue System is a full-stack multi-tenant SaaS solution for modern medical
 ### Frontend
 | Technology | Role |
 |---|---|
-| **Angular 18** | Standalone components, signals-based reactive state |
+| **Angular 21** | Standalone components, signals-based reactive state |
 | **RxJS** | HTTP streams, WebSocket event handling, interceptor deduplication |
 | **Angular Material** | Billing/Analytics UI components |
 | **Socket.io Client** | Real-time patient and reception sync |
@@ -319,7 +319,7 @@ All events are scoped to room `clinic:${clinicId}`.
 
 ```
 smart-queue-system/
-├── client/                          # Angular 18 frontend
+├── client/                          # Angular 21 frontend
 │   └── src/app/
 │       ├── core/
 │       │   ├── guards/              # authGuard, roleGuard
