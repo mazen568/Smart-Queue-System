@@ -40,7 +40,6 @@ clinicSchema.post("save", async function () {
             $setOnInsert: {
                 clinicId: this._id,
                 balance: 0,
-                updatedAt: new Date(),
             }
         },
         {
