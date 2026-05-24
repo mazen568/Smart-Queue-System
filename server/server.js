@@ -43,7 +43,10 @@ app.use(express.json())
 app.use(cookieParser())
 
 app.use(cors({
-    origin: process.env.CLIENT_URL || "http://localhost:4200",
+    origin: [
+        "http://localhost:4200",
+        process.env.CLIENT_URL
+    ].filter(Boolean),
     credentials: true
 }))
 
